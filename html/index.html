@@ -1,0 +1,198 @@
+
+<h1>Terminology</h1>
+
+<div class="definition" id="definition-fsaa">
+  <h2 class="line-text">FSAA (Full Scene Anti-Aliasing) / SSAA (Supersampling)</h2>
+  <p>
+    FSAA, also known as Supersampling Anti-Aliasing (SSAA), was the first type of real-time anti-aliasing available on graphics cards. It works by rendering the entire scene at a multiple of the final resolution (usually 2x or 4x) and then downscaling the image to reduce aliasing. While it produces excellent visual quality, it is extremely resource intensive, as the GPU must process every pixel at the higher resolution, making it impractical for most modern games without very powerful hardware.
+  </p>
+</div>
+
+<div class="definition" id="definition-msaa">
+  <h2 class="line-text">MSAA (Multisampling Anti-Aliasing)</h2>
+  <p>
+    MSAA is an optimized form of supersampling that selectively supersamples only the edges of polygons, the parts of the image where aliasing is most visible. By sampling only these edge fragments multiple times rather than the entire scene, MSAA greatly reduces the computational burden on the GPU while still producing noticeably smoother geometry edges. It is less effective at handling aliasing caused by shader effects or transparent textures.
+  </p>
+</div>
+
+<div class="definition" id="definition-mlaa">
+  <h2 class="line-text">MLAA (Morphological Anti-Aliasing)</h2>
+  <p>
+    MLAA is a post processing anti-aliasing technique that analyzes the final rendered image to detect jagged edges using pattern recognition. It then smooths those edges by blending neighboring pixels based on the detected shapes. Because it operates on the final image rather than generating extra samples during rendering, it is very fast and compatible with any rendering pipeline. However, it can introduce slight blurring to the image.
+  </p>
+</div>
+
+<div class="definition" id="definition-fxaa">
+  <h2 class="line-text">FXAA (Fast Approximate Anti-Aliasing)</h2>
+  <p>
+    FXAA is NVIDIA's post processing anti-aliasing solution that works similarly to MLAA. It uses GPU filters to detect high contrast edges in the final rendered image and smooths them by blending surrounding pixels. FXAA is extremely fast and has minimal performance overhead, making it suitable for lower end hardware and consoles. The trade off is a slight overall blurring of the image, which can reduce the sharpness of textures and fine details.
+  </p>
+</div>
+
+<div class="definition" id="definition-smaa">
+  <h2 class="line-text">SMAA (Subpixel Morphological Anti-Aliasing)</h2>
+  <p>
+    SMAA combines morphological anti-aliasing with limited supersampling to achieve high quality post processed anti-aliasing with less blurring than MLAA or FXAA alone. By generating some additional subpixel samples alongside edge detection based smoothing, SMAA produces sharper and more accurate results. It is more resource intensive than pure post process methods but is generally considered to deliver superior image quality.
+  </p>
+</div>
+
+<div class="definition" id="definition-txaa">
+  <h2 class="line-text">TXAA (Temporal Anti-Aliasing)</h2>
+  <p>
+    TXAA is NVIDIA's temporal anti-aliasing technique that blends elements of SSAA and FXAA along with temporal filtering. It uses data from multiple frames over time to smooth edges and reduce flickering artifacts that appear during motion. This produces very stable, film like image quality, but can introduce a softness or slight blur to the image. TXAA generally requires more resources than FXAA but less than full SSAA.
+  </p>
+</div>
+
+<div class="definition" id="definition-deferred-rendering">
+  <h2 class="line-text">Deferred Rendering</h2>
+  <p>
+    Deferred rendering is a rendering technique in which geometry and material information (such as positions, normals, albedo, and specular values) are first written to a set of screen space buffers known as the G buffer. Lighting calculations are then performed in a separate pass using the data stored in these buffers. This decouples lighting from geometry complexity, making it highly efficient for scenes with many dynamic lights. However, it struggles with transparency, requires more memory for the G buffer, and makes MSAA more difficult to apply.
+  </p>
+</div>
+
+<div class="definition" id="definition-forward-rendering">
+  <h2 class="line-text">Forward Rendering</h2>
+  <p>
+    Forward rendering is the traditional rendering approach in which each object in the scene is drawn and fully shaded, including all lighting calculations, in a single pass (or one pass per light). It is straightforward to implement and handles transparency and MSAA naturally. However, performance can degrade significantly as the number of lights increases, since every object must be evaluated against every light that affects it.
+  </p>
+</div>
+
+<div class="definition" id="definition-forward-plus-rendering">
+  <h2 class="line-text">Forward+ Rendering</h2>
+  <p>
+    Forward+ (also called Tiled Forward Rendering) is an evolution of forward rendering that improves its handling of many lights. The screen is divided into tiles, and a light culling pass determines which lights affect each tile. During the shading pass, each fragment only evaluates the lights assigned to its tile, dramatically reducing unnecessary lighting calculations. Forward+ retains the advantages of forward rendering, such as easy transparency handling and MSAA support, while approaching the multi light efficiency of deferred rendering.
+  </p>
+</div>
+
+<div class="definition" id="definition-opengl">
+  <h2 class="line-text">OpenGL</h2>
+  <p>
+    OpenGL (Open Graphics Library) is a cross platform graphics API that provides a standard interface for rendering 2D and 3D graphics. Managed by the Khronos Group, it has been widely used in game development, CAD applications, and scientific visualization for decades. OpenGL abstracts GPU hardware behind a state machine based API, making it relatively straightforward to learn. While it is being gradually superseded by Vulkan for high performance applications, OpenGL remains widely supported and is still used in many projects.
+  </p>
+</div>
+
+<div class="definition" id="definition-vulkan">
+  <h2 class="line-text">Vulkan</h2>
+  <p>
+    Vulkan is a modern, low overhead, cross platform graphics and compute API also managed by the Khronos Group. It gives developers much more explicit control over GPU operations such as memory management, synchronization, and command buffer recording. This lower level access enables better multi threaded rendering and reduced CPU overhead compared to OpenGL, but comes with significantly more complexity. Vulkan is widely used in modern game engines and high performance applications across Windows, Linux, Android, and other platforms.
+  </p>
+</div>
+
+<div class="definition" id="definition-metal">
+  <h2 class="line-text">Metal</h2>
+  <p>
+    Metal is Apple's proprietary low level graphics and compute API, designed for iOS, macOS, and tvOS devices. Similar in philosophy to Vulkan, it provides developers with close to hardware access for efficient rendering and GPU compute tasks. Metal is optimized specifically for Apple's hardware and is the primary graphics API for game development on Apple platforms, having replaced OpenGL ES and OpenGL on those devices.
+  </p>
+</div>
+
+<div class="definition" id="definition-directx">
+  <h2 class="line-text">DirectX</h2>
+  <p>
+    DirectX is a collection of APIs developed by Microsoft for handling multimedia tasks on Windows and Xbox platforms. Its graphics component, Direct3D, is the primary graphics API for Windows PC and Xbox game development. The latest version, Direct3D 12, offers low level hardware access similar to Vulkan, allowing developers to minimize CPU overhead and maximize GPU utilization. DirectX also includes components for audio (XAudio), input (DirectInput/XInput), and other multimedia functionality.
+  </p>
+</div>
+
+<div class="definition" id="definition-reflection">
+  <h2 class="line-text">Reflection</h2>
+  <p>
+    In real time rendering, reflection refers to the simulation of light bouncing off surfaces to show a mirror like image of the surrounding environment. Common techniques for achieving reflections include cube maps, planar reflections, screen space reflections (SSR), and ray traced reflections. Each method varies in accuracy, performance cost, and the types of surfaces it handles well. Realistic reflections are a key component of visually convincing materials such as metals, water, and polished surfaces.
+  </p>
+</div>
+
+<div class="definition" id="definition-cube-map">
+  <h2 class="line-text">Cube Map</h2>
+  <p>
+    A cube map is a texture composed of six square faces arranged as the faces of a cube, representing the environment as seen from a central point in all directions. It is commonly used for environment mapping (reflections), skyboxes, and image based lighting. To sample a cube map, a 3D direction vector is used to look up the corresponding texel on one of the six faces. While cube maps provide fast and convincing environment reflections, they represent the scene from a single point and do not account for parallax, which can cause inaccuracies on large or close surfaces.
+  </p>
+</div>
+
+<div class="definition" id="definition-blinn-phong">
+  <h2 class="line-text">Blinn Phong</h2>
+  <p>
+    Blinn Phong is a widely used empirical shading model for calculating specular highlights on surfaces. It is a modification of the original Phong reflection model that replaces the reflection vector with a halfway vector (the vector halfway between the light direction and the view direction), making it computationally cheaper and more physically plausible at grazing angles. The model combines ambient, diffuse, and specular components to approximate surface shading. While not physically based, Blinn Phong was the dominant shading model in real time graphics for many years and is still used in simpler or stylized rendering pipelines.
+  </p>
+</div>
+
+<div class="definition" id="definition-pbr">
+  <h2 class="line-text">Physically Based Rendering (PBR)</h2>
+  <p>
+    Physically Based Rendering is a shading and rendering approach that aims to simulate the interaction of light with surfaces in a way that is consistent with real world physics. PBR models use properties such as albedo, metalness, roughness, and fresnel reflectance to describe materials, ensuring they look realistic under any lighting condition. By adhering to energy conservation (a surface never reflects more light than it receives) and using physically derived BRDFs (Bidirectional Reflectance Distribution Functions), PBR produces consistent and predictable results. It has become the industry standard in modern game engines and film production.
+  </p>
+</div>
+
+<div class="definition" id="definition-specular-highlight">
+  <h2 class="line-text">Specular Highlight</h2>
+  <p>
+    A specular highlight is the bright spot of light that appears on a shiny surface when it reflects a light source toward the viewer. It results from the mirror like (specular) component of a surface's reflectance. The size, intensity, and sharpness of a specular highlight depend on the surface's roughness and the angle between the viewer, the surface, and the light source. In rendering, specular highlights are computed using shading models such as Blinn Phong or the Cook Torrance BRDF used in physically based rendering.
+  </p>
+</div>
+
+<div class="definition" id="definition-skeletal-animation">
+  <h2 class="line-text">Skeletal Animation</h2>
+  <p>
+    Skeletal animation is a technique for animating 3D models by defining an internal hierarchy of interconnected bones (a skeleton) and binding the model's mesh vertices to those bones through a process called skinning. When the bones are transformed (rotated, translated, or scaled), the associated vertices move accordingly, deforming the mesh to create fluid motion. This approach is far more memory efficient than storing per vertex animation data for every frame, and it enables blending between animations, procedural adjustments, and inverse kinematics. Skeletal animation is the standard method for animating characters and creatures in games.
+  </p>
+</div>
+
+<div class="definition" id="definition-frustum-culling">
+  <h2 class="line-text">Frustum Culling</h2>
+  <p>
+    Frustum culling is an optimization technique that discards objects which fall entirely outside the camera's view frustum, the truncated pyramid shaped volume that represents the visible area of the scene. Before rendering, each object's bounding volume (such as a bounding box or bounding sphere) is tested against the six planes of the frustum. Objects that are completely outside are skipped, saving the GPU from processing geometry that would never appear on screen. Frustum culling is a fundamental and computationally cheap optimization used in virtually every real time 3D application.
+  </p>
+</div>
+
+<div class="definition" id="definition-occlusion-culling">
+  <h2 class="line-text">Occlusion Culling</h2>
+  <p>
+    Occlusion culling is an optimization technique that prevents the rendering of objects that are completely hidden behind other objects from the camera's perspective. Unlike frustum culling, which only checks if objects are within the camera's view, occlusion culling determines whether visible objects block other objects from being seen. This can be done through various methods such as hardware occlusion queries, hierarchical Z buffer testing, or precomputed potentially visible sets (PVS). Occlusion culling is especially beneficial in complex scenes with dense geometry, such as indoor environments or urban landscapes.
+  </p>
+</div>
+
+<div class="definition" id="definition-ray-tracing">
+  <h2 class="line-text">Ray Tracing</h2>
+  <p>
+    Ray tracing is a rendering technique that simulates the physical behavior of light by casting rays from the camera into the scene and tracing their paths as they interact with surfaces. When a ray hits an object, it can generate secondary rays for reflections, refractions, and shadows, producing highly realistic lighting effects. Historically too expensive for real time use, dedicated hardware acceleration (such as NVIDIA's RT cores and AMD's Ray Accelerators) has made real time ray tracing feasible in modern games, though typically for selected effects such as reflections, shadows, or global illumination rather than full scene rendering.
+  </p>
+</div>
+
+<div class="definition" id="definition-path-tracing">
+  <h2 class="line-text">Path Tracing</h2>
+  <p>
+    Path tracing is an extension of ray tracing that simulates global illumination by tracing many random light paths per pixel, following rays as they bounce multiple times through a scene. Each bounce can interact with surfaces through diffuse reflection, specular reflection, refraction, or absorption, naturally capturing effects like color bleeding, soft shadows, and caustics. Because it requires many samples per pixel to converge to a noise free image, path tracing is computationally very expensive. It is the gold standard for offline rendering in film, and recent advances in hardware and denoising algorithms have begun to bring real time path tracing to games.
+  </p>
+</div>
+
+<div class="definition" id="definition-global-illumination">
+  <h2 class="line-text">Global Illumination</h2>
+  <p>
+    Global illumination (GI) is a collective term for rendering algorithms that simulate the way light interacts with an entire scene, accounting for both direct lighting from light sources and indirect lighting from light that has bounced off surfaces. GI produces realistic effects such as color bleeding, soft ambient shadows, and natural light falloff in enclosed spaces. Because full GI simulation is extremely expensive, real time applications use a variety of approximations including light baking, light probes, screen space global illumination (SSGI), voxel based methods, and hardware accelerated ray or path tracing. Achieving convincing global illumination is one of the central challenges of real time rendering.
+  </p>
+</div>
+
+<div class="definition" id="definition-indirect-lighting">
+  <h2 class="line-text">Indirect Lighting</h2>
+  <p>
+    Indirect lighting refers to light that has bounced off one or more surfaces before reaching a point in the scene, as opposed to direct lighting which travels straight from a light source. Indirect lighting is responsible for effects like color bleeding (where a red wall tints nearby surfaces red), soft ambient light in shadowed areas, and the overall natural feel of a lit environment. Simulating indirect lighting accurately is computationally expensive, so real time applications often rely on approximations such as light baking, light probes, screen space global illumination, or hardware accelerated ray and path tracing.
+  </p>
+</div>
+
+<div class="definition" id="definition-light-baking">
+  <h2 class="line-text">Light Baking</h2>
+  <p>
+    Light baking is the process of precomputing lighting information, including direct light, shadows, and indirect illumination, and storing the results in textures called lightmaps or in other data structures. Because the lighting is calculated offline (ahead of time), complex global illumination can be achieved without the runtime cost of dynamic lighting calculations. The main limitation is that baked lighting is static: it cannot respond to moving objects or changing light conditions. Many games use a hybrid approach, combining baked lighting for static elements with real time lighting for dynamic objects and effects.
+  </p>
+</div>
+
+<div class="definition" id="definition-light-probe">
+  <h2 class="line-text">Light Probe</h2>
+  <p>
+    A light probe is a point placed in the scene that captures and stores information about the surrounding lighting environment, typically encoded as spherical harmonics or a cube map. At runtime, dynamic objects near a light probe can sample its stored lighting data to receive approximate indirect illumination and ambient lighting that matches their surroundings. Light probes bridge the gap between fully baked static lighting and expensive real time global illumination, allowing dynamic objects to appear naturally integrated into pre lit environments. They are commonly placed throughout a level in a grid or at strategic locations.
+  </p>
+</div>
+
+<div class="definition" id="definition-spherical-harmonics">
+  <h2 class="line-text">Spherical Harmonics</h2>
+  <p>
+    Spherical harmonics are a set of mathematical basis functions defined on the surface of a sphere, used in computer graphics to efficiently encode and reconstruct low frequency lighting information. By projecting an environment's irradiance into a small number of spherical harmonic coefficients (typically 9 for second order SH), complex omnidirectional lighting can be stored and evaluated very cheaply at runtime. They are widely used to represent the diffuse indirect lighting stored in light probes and for fast approximation of ambient illumination on dynamic objects. Spherical harmonics are less suited for representing sharp, high frequency lighting details such as specular highlights.
+  </p>
+</div>
