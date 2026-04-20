@@ -120,6 +120,90 @@
   </p>
 </div>
 
+<div class="definition" id="definition-directional-light">
+  <h2 class="line-text">Directional Light</h2>
+  <p>
+    A directional light simulates a distant light source like the sun or moon, emitting parallel rays in a single direction across the entire scene. It has no position or distance based falloff, meaning it illuminates everything uniformly regardless of how far away objects are. Because it affects the whole scene, a directional light typically uses cascaded shadow maps to produce shadows at varying levels of detail across the camera's view range. Most outdoor scenes rely on a single directional light as the primary light source, often paired with a sky light or ambient term to fill in indirect illumination.
+  </p>
+</div>
+
+<div class="definition" id="definition-point-light">
+  <h2 class="line-text">Point Light</h2>
+  <p>
+    A point light emits light equally in all directions from a single position in space, similar to a bare light bulb. Its intensity diminishes with distance based on an attenuation function, and it typically has a defined maximum range beyond which it has no effect. Point lights are commonly used for indoor lighting, torches, lanterns, and other localized light sources. When a point light casts shadows, it requires an omnidirectional shadow map rendered into a cube map (six render passes), making shadow casting point lights significantly more expensive than directional or spot lights.
+  </p>
+</div>
+
+<div class="definition" id="definition-spot-light">
+  <h2 class="line-text">Spot Light</h2>
+  <p>
+    A spot light emits light from a single position but restricts its output to a cone shaped region defined by an inner and outer angle. Light within the inner angle is at full intensity, while light between the inner and outer angles falls off smoothly, creating a soft edge to the cone. Like point lights, spot lights attenuate with distance and have a defined range. They are commonly used for flashlights, streetlamps, stage lighting, and headlights. Because a spot light only covers a single direction, it only requires a standard 2D shadow map rather than a cube map, making its shadows much cheaper than those of a point light.
+  </p>
+</div>
+
+<div class="definition" id="definition-area-light">
+  <h2 class="line-text">Area Light</h2>
+  <p>
+    An area light emits light from a surface (such as a rectangle, disc, or sphere) rather than from a single point. Because the light originates from an area with physical size, it produces naturally soft shadows with realistic penumbra, where shadows are sharper near the contact point and softer further away. This makes area lights the most physically accurate light type, but also the most expensive to compute in real time. In many engines, area lights are only fully supported in baked or ray traced lighting pipelines. Some engines offer real time approximations using techniques like linearly transformed cosines (LTC) to shade area light contributions at interactive frame rates.
+  </p>
+</div>
+
+<div class="definition" id="definition-volumetric-light">
+  <h2 class="line-text">Volumetric Light</h2>
+  <p>
+    Volumetric lighting (sometimes referred to as god rays) simulates the visible scattering of light through a medium such as fog, dust, or smoke. When light passes through participating media, it scatters off tiny particles in the air, creating visible shafts or cones of light. This effect is commonly seen as sunbeams streaming through a window or a flashlight beam visible in a dusty room. In engines, volumetric lighting is typically achieved by ray marching through the light's volume and accumulating scattered light at each step, which can be expensive. Many engines optimize this by computing volumetric lighting at a reduced resolution and then upscaling and compositing the result into the final image. Volumetric lighting adds significant atmospheric depth and mood to a scene.
+  </p>
+</div>
+
+<div class="definition" id="definition-emissive-light">
+  <h2 class="line-text">Emissive Surfaces</h2>
+  <p>
+    An emissive surface is a material that appears to emit light by rendering brighter than its surroundings, but does not actually cast light into the scene on its own. The emissive property is typically stored as an emissive map or emissive color on the material, and it is added directly to the final pixel color, bypassing lighting calculations so the surface appears self lit regardless of the surrounding light conditions. Common examples include neon signs, TV screens, glowing runes, and LED panels. By itself, an emissive surface will not illuminate nearby geometry. To achieve that effect, a separate point or spot light is usually placed near the emissive surface to fake the contribution, or the emissive value is picked up by global illumination systems such as light baking, SSGI, or path tracing, which can propagate the emitted light onto surrounding surfaces naturally. In bloom post processing, bright emissive surfaces bleed light into neighboring pixels, further reinforcing the illusion that they are true light sources.
+  </p>
+</div>
+
+<div class="definition" id="definition-light-cookie">
+  <h2 class="line-text">Light Cookies</h2>
+  <p>
+    A light cookie is a texture applied to a light source that masks or patterns the light it emits, similar to how a physical gobo or stencil shapes light in photography and theater. When the light is projected onto a surface, the cookie texture modulates the light's intensity and optionally its color, creating shaped shadows and patterns. Common uses include simulating light filtering through window blinds, tree canopies casting dappled shadows, stained glass projecting colored patterns, or a flashlight with a realistic falloff pattern. For spot lights and directional lights, a standard 2D texture is used as the cookie. For point lights, a cube map cookie is used since the light emits in all directions. Light cookies are a cheap and effective way to add visual complexity and realism to lighting without requiring actual geometry to cast those shadows.
+  </p>
+</div>
+
+<div class="definition" id="definition-light-culling">
+  <h2 class="line-text">Light Culling</h2>
+  <p>
+    Light culling is the process of determining which lights actually contribute to the visible scene so that the engine does not waste resources evaluating lights that have no visible effect. Lights that are outside the camera's view frustum, too far away to have any influence, or whose contribution is too small to be perceptible are excluded from rendering. In tiled or clustered rendering pipelines, the screen is divided into tiles (or 3D clusters for clustered shading), and each tile maintains a list of only the lights that overlap it, so fragments are only shaded against relevant lights. This makes it practical to have scenes with hundreds or even thousands of lights without crippling performance, as each pixel only evaluates a small subset of the total light count.
+  </p>
+</div>
+
+<div class="definition" id="definition-light-budget">
+  <h2 class="line-text">Light Budget and Shadow Budget</h2>
+  <p>
+    Most game engines impose a practical limit on the number of lights that can be active in a scene at once, often referred to as a light budget. While modern deferred and Forward+ pipelines can handle large numbers of lights for shading, the real bottleneck is usually shadows. Each shadow casting light requires one or more additional render passes to generate its shadow map, and for point lights this means rendering the scene six times into a cube map. Because of this cost, engines typically cap the number of simultaneously shadow casting lights and use heuristics to decide which lights deserve shadows, often prioritizing lights that are close to the camera, bright, or affecting important gameplay areas. Smaller or less important lights may have their shadows disabled entirely, relying on ambient occlusion or other tricks to fake contact darkness. Managing the shadow budget is one of the most important performance considerations for lighting artists working on a game.
+  </p>
+</div>
+
+<div class="definition" id="definition-omnidirectional-shadow-map">
+  <h2 class="line-text">Omnidirectional Shadow Maps</h2>
+  <p>
+    Omnidirectional shadow maps are used to generate shadows from point lights, which emit light in all directions. Because a standard 2D shadow map can only capture depth from a single viewpoint, a point light requires rendering the scene from its position in all six axial directions (positive and negative X, Y, and Z), each with a 90 degree field of view, to fully cover the surrounding environment. The resulting six depth images are stored in a cube map, which can then be sampled using a 3D direction vector during the lighting pass to determine whether a fragment is in shadow. This means a single shadow casting point light costs roughly six times as much as a single shadow casting directional or spot light, which is a major reason engines are conservative about how many point lights are allowed to cast shadows simultaneously.
+  </p>
+</div>
+
+<div class="definition" id="definition-light-attenuation">
+  <h2 class="line-text">Light Attenuation</h2>
+  <p>
+    Light attenuation describes how the intensity of a light decreases as the distance from the light source increases. In the real world, light follows an inverse square law, where intensity falls off proportionally to one over the distance squared. In game engines, this physical falloff is often modified with a maximum range or a smoothing function so that the light's influence drops to zero at a defined radius, allowing the engine to skip the light entirely for fragments beyond that range. This bounded attenuation is essential for light culling, since it gives every point and spot light a finite volume of influence that can be tested against screen tiles, clusters, or frustum bounds. Without it, every light in the scene would technically affect every surface, making efficient culling impossible.
+  </p>
+</div>
+
+<div class="definition" id="definition-clustered-shading">
+  <h2 class="line-text">Clustered Shading</h2>
+  <p>
+    Clustered shading is an extension of tiled light culling that divides the view frustum into a 3D grid of clusters rather than a 2D grid of screen space tiles. Each cluster is a small volume in world space, and during a culling pass, each light is assigned to only the clusters it overlaps. When a fragment is shaded, it looks up which cluster it belongs to and only evaluates the lights assigned to that cluster. This is more accurate than 2D tiled approaches because it avoids the problem of a tile containing lights at very different depths that do not actually affect the same fragments. Clustered shading works well with both forward and deferred pipelines and scales efficiently to scenes with many lights at varying depths.
+  </p>
+</div>
+
 <h2 class="section-header">Ray Tracing & Path Tracing</h2>
 
 <div class="definition" id="definition-ray-tracing">
