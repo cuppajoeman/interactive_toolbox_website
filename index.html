@@ -76,6 +76,20 @@
   </p>
 </div>
 
+<div class="definition" id="definition-dithering">
+  <h2 class="line-text">Dithering</h2>
+  <p>
+    Dithering is a technique that introduces a small amount of intentional noise to break up visible banding artifacts that occur when a gradient or smooth transition is represented with insufficient precision. In rendering, banding is most commonly seen in color gradients (such as a sunset sky or a dark shadow falloff) where the limited bit depth of the frame buffer cannot represent the subtle differences between adjacent colors, resulting in visible stair stepped bands. Dithering adds a fine pattern of noise at the sub pixel level that tricks the eye into perceiving smoother transitions than the bit depth would otherwise allow. It is also used in LOD transitions, where a dithered stipple pattern gradually fades geometry in and out to avoid a hard visual pop when switching between detail levels. Similarly, dithering can be applied to transparency by rendering a surface with a screen door pattern of discarded pixels rather than requiring a separate transparency pass, which is especially useful in deferred rendering where true alpha blending is difficult. The noise introduced by dithering is generally imperceptible at normal viewing distances and is a very cheap way to improve perceived visual quality.
+  </p>
+</div>
+
+<div class="definition" id="definition-checkerboard-rendering">
+  <h2 class="line-text">Checkerboard Rendering</h2>
+  <p>
+    Checkerboard rendering is an optimization technique that renders only half the pixels in a frame using an alternating checkerboard pattern, then reconstructs the missing pixels using data from the current and previous frames. On one frame, the even pixels are rendered and the odd pixels are filled in, and on the next frame the pattern is reversed. By combining the two half resolution frames along with motion vectors to account for movement, the engine can reconstruct a full resolution image at roughly half the shading cost. This technique was popularized on consoles (notably the PlayStation 4 Pro) as a way to approach 4K output without the full performance cost of native 4K rendering. The quality of the reconstruction depends heavily on the accuracy of the motion vectors and the complexity of the scene, and fast moving objects or fine detail can sometimes produce visible artifacts. Checkerboard rendering is conceptually related to interlaced rendering, where alternating rows or columns are rendered on alternating frames, but the checkerboard pattern distributes the missing pixels more evenly across the image, producing better reconstruction quality.
+  </p>
+</div>
+
 <h2 class="section-header">Lighting & Global Illumination</h2>
 
 <div class="definition" id="definition-global-illumination">
@@ -404,6 +418,13 @@
   <h2 class="line-text">Mip Mapping</h2>
   <p>
     Mip mapping is a technique where precomputed, progressively smaller versions of a texture (called mip levels) are stored alongside the original. Each mip level is typically half the resolution of the previous one. When a textured surface is far from the camera and occupies fewer pixels on screen, the GPU samples from a smaller mip level instead of the full resolution texture. This avoids aliasing artifacts and shimmering that occur when a high resolution texture is minified too aggressively, and it also improves cache performance on the GPU since smaller textures are more memory friendly. Mip levels are usually generated automatically at asset import time or at runtime and the GPU selects the appropriate level (or blends between two levels) based on the screen space size of the surface.
+  </p>
+</div>
+
+<div class="definition" id="definition-anisotropic-filtering">
+  <h2 class="line-text">Anisotropic Filtering</h2>
+  <p>
+    Anisotropic filtering is a texture sampling technique that improves the sharpness and clarity of textures viewed at steep angles relative to the camera. Standard bilinear or trilinear filtering samples textures uniformly in both directions, which works well when a surface is viewed head on but produces blurriness when the surface stretches away from the camera at an oblique angle, such as a road disappearing into the distance or a floor seen from a low camera. Anisotropic filtering addresses this by taking additional samples along the axis of greatest compression, preserving texture detail in the stretched direction. The level of anisotropic filtering (such as 2x, 4x, 8x, or 16x) determines the maximum number of additional samples taken per pixel, with higher levels producing sharper results at a modest performance cost. On modern hardware the overhead is minimal, and most engines and drivers default to 16x anisotropic filtering as it provides the best visual quality with negligible impact on frame rate.
   </p>
 </div>
 
