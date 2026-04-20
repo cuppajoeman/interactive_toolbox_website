@@ -656,6 +656,113 @@
   </p>
 </div>
 
+<h2 class="section-header">Interpolation</h2>
+
+<div class="definition" id="definition-interpolation">
+  <h2 class="line-text">Interpolation</h2>
+  <p>
+    Interpolation is the process of calculating intermediate values between two or more known data points. In game development, interpolation is used everywhere: blending between animation keyframes, moving objects smoothly along paths, transitioning between colors, fading audio, easing UI elements, and computing values between vertices during rasterization. The simplest form is linear interpolation, but many situations benefit from higher order or specialized interpolation methods that produce smoother, more natural, or more physically correct results. Most interpolation methods operate on a parameter t that ranges from 0 to 1, where 0 represents the start value and 1 represents the end value, and values in between represent the blended result.
+  </p>
+</div>
+
+<div class="definition" id="definition-linear-interpolation">
+  <h2 class="line-text">Linear Interpolation (Lerp)</h2>
+  <p>
+    Linear interpolation, commonly called lerp, is the simplest interpolation method. Given two values A and B and a parameter t between 0 and 1, the result is computed as A plus t multiplied by (B minus A), which produces a straight line transition between the two values. Lerp is used extensively in rendering and game logic for blending colors, positions, UVs, and any other numeric values. Its simplicity and speed make it the default choice in most situations, but the result has constant velocity and no smoothing at the start or end, which can look mechanical or abrupt for animations and camera movements. Lerp can also be applied per component to vectors, producing a straight line path between two points in space.
+  </p>
+</div>
+
+<div class="definition" id="definition-bilinear-interpolation">
+  <h2 class="line-text">Bilinear Interpolation</h2>
+  <p>
+    Bilinear interpolation extends linear interpolation to two dimensions by performing lerp in one axis and then lerping the results along the other axis. Given four values arranged in a square grid (like the four nearest texels surrounding a sample point), bilinear interpolation blends between them based on the fractional position within the cell. This is the standard method used by GPUs for texture sampling when a texture coordinate falls between texel centers, producing smooth gradients across the surface rather than the blocky appearance that nearest neighbor sampling would give. Bilinear interpolation is also used for heightmap sampling, lightmap lookups, and any situation where a smooth 2D grid lookup is needed.
+  </p>
+</div>
+
+<div class="definition" id="definition-trilinear-interpolation">
+  <h2 class="line-text">Trilinear Interpolation</h2>
+  <p>
+    Trilinear interpolation extends bilinear interpolation into a third dimension, most commonly used for sampling between mip map levels in texturing. When the GPU determines that the ideal mip level for a surface falls between two discrete mip levels, it performs bilinear interpolation on each of the two nearest mip levels and then linearly interpolates between those two results based on the fractional mip level. This eliminates the visible seam that would otherwise appear where the GPU switches from one mip level to the next, producing a smooth transition as surfaces recede into the distance. Trilinear filtering is standard on all modern GPUs and is typically enabled by default alongside mip mapping.
+  </p>
+</div>
+
+<div class="definition" id="definition-quadratic-interpolation">
+  <h2 class="line-text">Quadratic Interpolation</h2>
+  <p>
+    Quadratic interpolation uses a second degree polynomial to blend between values, producing a curve rather than a straight line. Given three control points, a quadratic function can be fit that passes through or is influenced by all three, creating a smooth arc between the start and end values. The result accelerates or decelerates depending on the placement of the middle control point. Quadratic interpolation is commonly seen in easing functions (such as ease in quad, where t is squared, causing slow acceleration from rest) and in quadratic Bezier curves. It offers a good balance between smoothness and computational cost, adding one degree of curvature beyond linear interpolation without the complexity of higher order methods.
+  </p>
+</div>
+
+<div class="definition" id="definition-cubic-interpolation">
+  <h2 class="line-text">Cubic Interpolation</h2>
+  <p>
+    Cubic interpolation uses a third degree polynomial to blend between values, providing smoother transitions than quadratic interpolation with control over both the curvature and the tangent (rate of change) at each endpoint. Given four data points (or two points with two tangents), a cubic polynomial can produce an S shaped curve that accelerates and decelerates naturally. Cubic interpolation forms the mathematical basis of cubic Bezier curves, Hermite splines, and Catmull Rom splines. The classic smoothstep function used in shaders (3t squared minus 2t cubed) is a cubic interpolant that produces zero derivative at both endpoints, creating a smooth ease in and ease out. Cubic interpolation is the most commonly used higher order interpolation in game development due to its good balance of smoothness, flexibility, and performance.
+  </p>
+</div>
+
+<div class="definition" id="definition-quintic-interpolation">
+  <h2 class="line-text">Quintic Interpolation</h2>
+  <p>
+    Quintic interpolation uses a fifth degree polynomial to blend between values, offering even smoother results than cubic interpolation by ensuring that both the first and second derivatives are zero at the endpoints. This means not only the value and its rate of change but also the rate of change of the rate of change transitions smoothly, eliminating any subtle discontinuities in acceleration. The most well known quintic interpolant in game development is Ken Perlin's improved smoothstep (6t to the fifth minus 15t to the fourth plus 10t cubed), which he introduced to fix the visible artifacts in his original noise function caused by the second derivative discontinuity of the cubic smoothstep. Quintic interpolation is primarily used in procedural noise generation and situations where the highest possible smoothness is required, but for most gameplay and animation purposes cubic interpolation is sufficient.
+  </p>
+</div>
+
+<div class="definition" id="definition-bezier-curve">
+  <h2 class="line-text">Bezier Curve</h2>
+  <p>
+    A Bezier curve is a parametric curve defined by a set of control points that influence its shape. The curve begins at the first control point and ends at the last, but does not necessarily pass through the intermediate control points, instead being pulled toward them. The most common variants in game development are the quadratic Bezier (three control points, second degree) and the cubic Bezier (four control points, third degree). A quadratic Bezier is evaluated using two nested lerps: interpolate between points 0 and 1, interpolate between points 1 and 2, then interpolate between those two results. A cubic Bezier extends this to three levels of nested lerps across four points. Bezier curves are widely used for camera paths, UI animation easing curves, particle trajectories, road and track generation, and font rendering. Multiple Bezier curves can be joined end to end to form longer complex paths, and when the tangents at the joints are matched, the result is a smooth continuous spline.
+  </p>
+</div>
+
+<div class="definition" id="definition-hermite-spline">
+  <h2 class="line-text">Hermite Spline</h2>
+  <p>
+    A Hermite spline is a cubic curve segment defined by two endpoints and two tangent vectors, one at each endpoint. The tangent vectors control the direction and speed at which the curve leaves and arrives at each point, giving direct control over the shape of the curve without intermediate control points. The cubic polynomial is solved such that the curve passes exactly through both endpoints with the specified tangent directions. Hermite splines are mathematically equivalent to cubic Bezier curves (one can be converted to the other), but the tangent based parameterization is often more intuitive for animation workflows where an artist wants to define a keyframe value and the velocity at that keyframe. Many animation curve editors in game engines are Hermite spline editors under the hood.
+  </p>
+</div>
+
+<div class="definition" id="definition-catmull-rom-spline">
+  <h2 class="line-text">Catmull Rom Spline</h2>
+  <p>
+    A Catmull Rom spline is a type of cubic spline that automatically passes through all of its control points, with the tangent at each point derived from the positions of its two neighboring points. This means the artist or designer only needs to place points and the curve will smoothly pass through every one of them without any manual tangent adjustment. The tangent at each point is calculated as the direction from the previous point to the next point, scaled by a factor (typically 0.5). This makes Catmull Rom splines extremely convenient for defining camera paths, AI patrol routes, and any situation where a smooth curve needs to hit a series of specific positions. The trade off compared to Bezier or Hermite splines is less direct control over the exact shape of the curve between points, since the tangents are computed automatically.
+  </p>
+</div>
+
+<div class="definition" id="definition-slerp">
+  <h2 class="line-text">Slerp (Spherical Linear Interpolation)</h2>
+  <p>
+    Spherical linear interpolation, or slerp, is an interpolation method designed for rotations, most commonly applied to quaternions or unit vectors on a sphere. Unlike standard linear interpolation, which travels in a straight line through the interior of the space and produces uneven angular velocity when applied to rotations, slerp travels along the surface of the unit sphere (the great arc between two orientations), producing a constant angular velocity throughout the interpolation. This results in smooth, natural looking rotation blending with no acceleration or deceleration. Slerp is the standard method for interpolating between keyframed rotations in skeletal animation, blending camera orientations, and any situation where two rotations need to be smoothly combined. For very small angles, slerp can be numerically unstable, so engines often fall back to a normalized lerp (nlerp) in those cases, which is cheaper and produces nearly identical results when the angle between the two rotations is small.
+  </p>
+</div>
+
+<div class="definition" id="definition-nlerp">
+  <h2 class="line-text">Nlerp (Normalized Linear Interpolation)</h2>
+  <p>
+    Normalized linear interpolation, or nlerp, is a cheap approximation of slerp that works by performing a standard linear interpolation between two quaternions (or unit vectors) and then normalizing the result back to unit length. Because lerp travels through the interior of the sphere rather than along its surface, the interpolated values are slightly shorter than unit length and the angular velocity is not perfectly constant, moving faster in the middle and slower at the ends. However, for small angles the difference from slerp is negligible, and even for larger angles the visual result is often acceptable. Nlerp is significantly faster than slerp because it avoids the trigonometric functions (sin and acos) that slerp requires, making it a common choice in performance critical code like animation blending where many quaternion interpolations are performed every frame.
+  </p>
+</div>
+
+<div class="definition" id="definition-quaternion">
+  <h2 class="line-text">Quaternion</h2>
+  <p>
+    A quaternion is a four component mathematical representation of rotation (w, x, y, z) that is widely used in game engines as an alternative to Euler angles and rotation matrices. Quaternions represent rotations as a unit length four dimensional vector, and they offer several important advantages for real time applications. They do not suffer from gimbal lock, a problem with Euler angles where two rotation axes can align and cause a loss of one degree of freedom. They interpolate smoothly using slerp or nlerp, which is essential for animation blending. They are compact (four floats versus nine for a rotation matrix) and composing two quaternion rotations is cheaper than multiplying two 3x3 matrices. The main drawback is that quaternions are less intuitive to visualize and author by hand compared to Euler angles, so most engines allow artists to work in Euler angles in the editor while using quaternions internally for all rotation math.
+  </p>
+</div>
+
+<div class="definition" id="definition-easing-functions">
+  <h2 class="line-text">Easing Functions</h2>
+  <p>
+    Easing functions are mathematical functions applied to the t parameter of an interpolation to control the rate of change over time, producing more natural or stylized motion. A linear interpolation with no easing moves at constant speed, which often looks mechanical. An ease in function starts slow and accelerates (for example, t squared for quadratic ease in). An ease out function starts fast and decelerates (for example, one minus the square of one minus t). An ease in out function combines both, starting slow, accelerating through the middle, and decelerating at the end. Easing functions are fundamental to UI animation, camera transitions, gameplay tweens, and any situation where movement or change should feel organic. Common easing families include quadratic, cubic, quartic, quintic, sinusoidal, exponential, circular, elastic, back, and bounce, each producing a distinct motion character.
+  </p>
+</div>
+
+<div class="definition" id="definition-smoothstep">
+  <h2 class="line-text">Smoothstep</h2>
+  <p>
+    Smoothstep is a commonly used interpolation function in shaders and procedural math that produces a smooth S shaped transition between 0 and 1. The standard cubic smoothstep is computed as 3t squared minus 2t cubed, which has the property that its first derivative is zero at both t equals 0 and t equals 1, meaning the transition starts and ends with zero velocity. This makes it ideal for soft thresholds, gradient masks, and any situation where a hard edge needs to be softened into a smooth blend. Most shading languages provide a built in smoothstep function that takes a lower edge, an upper edge, and an input value, remapping and clamping the input into the 0 to 1 range with the smooth curve applied. The improved variant, smootherstep (the quintic version introduced by Perlin), additionally zeroes the second derivative at the endpoints for even smoother results and is preferred in procedural noise generation.
+  </p>
+</div>
+
 <h2 class="section-header">Transparency</h2>
 
 <div class="definition" id="definition-transparency">
