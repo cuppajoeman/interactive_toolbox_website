@@ -32,6 +32,62 @@
 
 <h2 class="section-header">Rendering Pipelines</h2>
 
+<div class="definition" id="definition-graphics-pipeline">
+  <h2 class="line-text">Graphics Pipeline</h2>
+  <p>
+    The graphics pipeline is the sequence of stages that the GPU executes to transform 3D scene data into a final 2D image on screen. In a modern rasterization pipeline, this process begins with the application stage on the CPU, where draw calls are submitted along with vertex data, textures, and state. The GPU then takes over with the vertex processing stage, where each vertex is transformed from model space through world and view space into clip space. After clipping and perspective division, the rasterization stage converts the projected triangles into fragments (potential pixels). Each fragment then passes through the fragment processing stage, where its final color is calculated based on textures, lighting, and material properties. Finally, the output merging stage performs depth testing, stencil testing, and blending before writing the result to the frame buffer. Some stages of the pipeline are fixed function (like rasterization and depth testing), meaning they are handled by dedicated hardware and cannot be reprogrammed, while others are programmable through shaders. Understanding the graphics pipeline is fundamental to game rendering, as every visual technique is built on top of or interacts with these stages.
+  </p>
+</div>
+
+<div class="definition" id="definition-shader">
+  <h2 class="line-text">Shader</h2>
+  <p>
+    A shader is a small program that runs on the GPU at a specific stage of the graphics pipeline, allowing developers to control how vertices, pixels, and other data are processed. Shaders are written in specialized languages such as GLSL (for OpenGL and Vulkan), HLSL (for DirectX), or MSL (for Metal). The most common types of shader are the vertex shader and the fragment shader (also called a pixel shader). A vertex shader runs once per vertex and is responsible for transforming vertex positions, passing along UVs and normals, and performing any per vertex calculations. A fragment shader runs once per fragment (candidate pixel) and determines the final color of that pixel based on lighting, textures, material properties, and any other visual logic. Beyond these two, modern pipelines also support geometry shaders (which can generate or discard primitives), tessellation shaders (which subdivide geometry on the GPU for added detail), and compute shaders (which run general purpose parallel computations outside the traditional graphics pipeline). Shaders are what give developers fine grained artistic and technical control over how everything in a game looks.
+  </p>
+</div>
+
+<div class="definition" id="definition-vertex-shader">
+  <h2 class="line-text">Vertex Shader</h2>
+  <p>
+    A vertex shader is a programmable stage of the graphics pipeline that runs once for every vertex submitted to the GPU. Its primary responsibility is transforming each vertex from its local model space into clip space by applying the model, view, and projection matrices. Beyond transformation, vertex shaders can also manipulate vertex attributes such as normals, texture coordinates, and colors, and can pass computed data (called varyings or interpolants) downstream to the fragment shader. Vertex shaders are also commonly used for effects like skeletal animation skinning on the GPU, wind displacement on foliage, and water surface wave deformation. Because the vertex shader operates per vertex rather than per pixel, work done here is generally much cheaper than equivalent work in the fragment shader, especially on high polygon count meshes viewed at a distance.
+  </p>
+</div>
+
+<div class="definition" id="definition-fragment-shader">
+  <h2 class="line-text">Fragment Shader</h2>
+  <p>
+    A fragment shader (called a pixel shader in DirectX terminology) is a programmable stage of the graphics pipeline that runs once for every fragment generated during rasterization. Its job is to determine the final color of each pixel by combining texture sampling, lighting calculations, material properties, and any other visual logic the developer defines. The fragment shader receives interpolated data from the vertex shader (such as UVs, normals, and world positions) and uses it to compute the output. This is the stage where most of the visual character of a game is determined, including PBR shading, normal mapping, parallax mapping, transparency, and post processing effects. Because the fragment shader runs per pixel and modern displays have millions of pixels, it is typically the most performance sensitive stage of the pipeline, and optimizing fragment shader complexity is a key concern in real time rendering.
+  </p>
+</div>
+
+<div class="definition" id="definition-geometry-shader">
+  <h2 class="line-text">Geometry Shader</h2>
+  <p>
+    A geometry shader is an optional programmable stage that sits between the vertex shader and rasterization. It receives entire primitives (points, lines, or triangles) as input and can output zero or more new primitives. This gives it the ability to generate new geometry on the fly, such as extruding fins for fur rendering, generating billboard quads from point particles, or creating wireframe overlays. However, geometry shaders have largely fallen out of favor in modern engines because they tend to perform poorly on most GPU architectures due to the unpredictable and variable amount of output they produce. Many of the tasks geometry shaders were once used for are now handled more efficiently by compute shaders or mesh shaders.
+  </p>
+</div>
+
+<div class="definition" id="definition-tessellation-shader">
+  <h2 class="line-text">Tessellation Shader</h2>
+  <p>
+    Tessellation shaders are a pair of programmable stages (the hull shader and the domain shader in DirectX terminology, or the tessellation control shader and tessellation evaluation shader in OpenGL) that work together to subdivide geometry on the GPU. The hull shader determines how much each patch of the mesh should be subdivided based on factors like distance from the camera or desired detail level. A fixed function tessellator then generates the new vertices according to those instructions. Finally, the domain shader positions each new vertex, often using a displacement map to add surface detail. Tessellation allows a low polygon mesh to be dynamically refined into a much more detailed version on the GPU, which is useful for terrain, character close ups, and any surface where geometric detail needs to scale with viewing distance without sending a high polygon mesh from the CPU.
+  </p>
+</div>
+
+<div class="definition" id="definition-compute-shader">
+  <h2 class="line-text">Compute Shader</h2>
+  <p>
+    A compute shader is a general purpose program that runs on the GPU outside of the traditional graphics pipeline. Unlike vertex or fragment shaders, compute shaders are not tied to rendering geometry or pixels. Instead, they operate on arbitrary data in parallel, taking advantage of the GPU's massively parallel architecture to perform large scale computations. In game engines, compute shaders are used for a wide variety of tasks including particle simulation, physics calculations, light culling (in tiled and clustered shading), post processing effects, GPU driven culling and draw call generation, image processing, and AI inference. Compute shaders read from and write to buffers and textures freely, giving them much more flexibility than the fixed input and output model of the graphics pipeline stages.
+  </p>
+</div>
+
+<div class="definition" id="definition-mesh-shader">
+  <h2 class="line-text">Mesh Shader</h2>
+  <p>
+    Mesh shaders are a modern replacement for the traditional vertex, geometry, and tessellation stages of the graphics pipeline, introduced in NVIDIA's Turing architecture and supported in DirectX 12 Ultimate and Vulkan. Instead of processing individual vertices through a fixed pipeline, mesh shaders work on small groups of vertices and triangles called meshlets, giving developers full control over how geometry is processed, generated, and culled before rasterization. A mesh shader pipeline consists of an optional task shader (also called an amplification shader) that can decide which meshlets to process and how many mesh shader groups to launch, followed by the mesh shader itself which outputs the final triangles. This model maps much more naturally to how modern GPUs actually work, enabling more efficient GPU driven rendering, per meshlet culling, and dynamic level of detail without the performance pitfalls of geometry shaders.
+  </p>
+</div>
+
 <div class="definition" id="definition-forward-rendering">
   <h2 class="line-text">Forward Rendering</h2>
   <p>
@@ -439,6 +495,222 @@
   <h2 class="line-text">Texture Atlas</h2>
   <p>
     A texture atlas is a single large image that contains multiple smaller textures arranged side by side, typically all belonging to the same model or a set of related assets. For example, when exporting a character model, the diffuse textures for the head, body, clothing, and accessories might all be laid out together in one atlas with the UVs adjusted to point to the correct region of the image. This allows the entire model to be rendered with a single texture bind and a single draw call rather than switching textures for each part. Texture atlasing differs from texture packing in that it arranges whole images spatially within one texture rather than combining separate data into individual color channels.
+  </p>
+</div>
+
+<h2 class="section-header">Buffers</h2>
+
+<div class="definition" id="definition-frame-buffer">
+  <h2 class="line-text">Frame Buffer</h2>
+  <p>
+    The frame buffer is the final destination for all rendered pixel data and represents the image that will be displayed on screen. It is a collection of multiple buffers (typically including a color buffer, depth buffer, and stencil buffer) that together hold all the information needed to produce and validate the final image. In modern rendering, engines often render to offscreen frame buffers (also called render targets) first, allowing post processing effects to be applied before the result is copied to the screen's display buffer. Double buffering and triple buffering are common strategies where two or three frame buffers are used in rotation so the GPU can render to one while the display reads from another, preventing visual tearing.
+  </p>
+</div>
+
+<div class="definition" id="definition-color-buffer">
+  <h2 class="line-text">Color Buffer</h2>
+  <p>
+    The color buffer is the part of the frame buffer that stores the actual RGBA color values for each pixel on screen. When a fragment shader outputs a color, it is written to the color buffer (subject to blending, depth testing, and other operations). In a standard pipeline, there is one color buffer that holds the final image, but modern techniques like deferred rendering and multiple render targets (MRT) allow the GPU to write to several color buffers simultaneously in a single pass. The bit depth of the color buffer determines the precision of the stored colors. A standard 8 bits per channel buffer provides 256 levels per channel, while HDR rendering typically uses 16 bit or 32 bit floating point color buffers to represent a much wider range of brightness values before tonemapping the result down to displayable range.
+  </p>
+</div>
+
+<div class="definition" id="definition-depth-buffer">
+  <h2 class="line-text">Depth Buffer (Z Buffer)</h2>
+  <p>
+    The depth buffer (also called the Z buffer) is a screen sized buffer that stores the depth (distance from the camera) of the nearest rendered fragment at each pixel. When a new fragment is rasterized, its depth is compared against the value already in the depth buffer. If the new fragment is closer, it passes the depth test, its color is written to the color buffer, and the depth buffer is updated with the new depth. If it is further away, the fragment is discarded. This mechanism is what allows opaque objects to correctly occlude each other regardless of the order they are drawn. The depth buffer is typically stored at 24 bit or 32 bit precision, and because depth values are not distributed linearly (more precision exists near the camera and less far away), careful management of the near and far clip planes is important to avoid z fighting, where two surfaces at similar depths flicker as they compete for the same depth buffer values.
+  </p>
+</div>
+
+<div class="definition" id="definition-stencil-buffer">
+  <h2 class="line-text">Stencil Buffer</h2>
+  <p>
+    The stencil buffer is a per pixel integer buffer (typically 8 bits) that acts as a masking tool during rendering. Developers can write values to the stencil buffer and then configure stencil tests that determine whether subsequent fragments should be drawn or discarded based on the value already stored at that pixel. This enables a wide range of effects including portal rendering (only draw what is visible through a portal opening), mirror reflections (restrict reflection rendering to the mirror surface), shadow volumes (mark pixels that are in shadow), decal masking (prevent decals from bleeding onto unrelated surfaces), and outline effects (draw an object to the stencil, then draw a slightly larger version only where the stencil was not set). The stencil buffer is often stored alongside the depth buffer in a combined depth stencil format such as D24S8 (24 bits for depth, 8 bits for stencil).
+  </p>
+</div>
+
+<div class="definition" id="definition-g-buffer">
+  <h2 class="line-text">G Buffer (Geometry Buffer)</h2>
+  <p>
+    The G buffer is a collection of screen sized textures used in deferred rendering to store per pixel geometry and material information during the initial geometry pass. A typical G buffer setup includes separate render targets for world space or view space normals, albedo (base color), roughness, metalness, emissive values, and depth. Some engines also store motion vectors, ambient occlusion, or material IDs in the G buffer. Once the geometry pass is complete, a subsequent lighting pass reads from these buffers to calculate the final shading for each pixel. This decouples geometry rendering from lighting, allowing many lights to be evaluated efficiently. The trade off is the significant memory bandwidth required to write and read multiple full screen textures every frame, which is one of the main costs of deferred rendering.
+  </p>
+</div>
+
+<div class="definition" id="definition-accumulation-buffer">
+  <h2 class="line-text">Accumulation Buffer</h2>
+  <p>
+    An accumulation buffer is a buffer used to combine the results of multiple rendering passes into a single image. Conceptually, each pass renders a partial result that is added to the accumulation buffer, and the final accumulated value is divided by the number of passes or otherwise normalized to produce the output. Historically, accumulation buffers were a fixed function feature of older graphics APIs and were used for effects like motion blur (accumulating multiple frames at different time steps), depth of field (accumulating frames with shifted focus), and anti aliasing (accumulating jittered samples). In modern rendering, dedicated accumulation buffers have been largely replaced by floating point render targets and compute shader based techniques that achieve the same results more flexibly, but the concept of accumulating intermediate results across passes remains central to many algorithms including path tracing, temporal anti aliasing, and weighted blended OIT.
+  </p>
+</div>
+
+<div class="definition" id="definition-render-target">
+  <h2 class="line-text">Render Target</h2>
+  <p>
+    A render target is a texture or buffer that the GPU can write to as if it were the screen, allowing the engine to render a scene or effect into an offscreen image rather than directly to the display. Render targets are the foundation of almost every modern rendering technique. Post processing chains render the scene to an offscreen render target, apply effects like bloom, tonemapping, and color grading, and then output the final result to the screen. Shadow maps are depth only render targets rendered from the light's perspective. Reflection probes capture the environment into cube map render targets. The G buffer in deferred rendering is a set of multiple render targets written to simultaneously using multiple render target (MRT) output from a single fragment shader. Render targets can have different formats and precisions depending on the data they need to store, from standard 8 bit RGBA for color to 32 bit floating point for HDR values or single channel depth.
+  </p>
+</div>
+
+<div class="definition" id="definition-depth-stencil-buffer">
+  <h2 class="line-text">Depth Stencil Buffer</h2>
+  <p>
+    A depth stencil buffer is a combined buffer that stores both depth and stencil information in a single resource. The most common format is D24S8, which allocates 24 bits per pixel for depth and 8 bits for the stencil value. Another common format is D32_S8, which provides full 32 bit floating point depth alongside 8 bits of stencil. Combining the two into one buffer is an efficiency measure, as depth testing and stencil testing are both performed during the same stage of the pipeline (output merging) and are almost always needed together. The GPU can read, test, and write both values in a single operation per fragment rather than accessing two separate memory locations.
+  </p>
+</div>
+
+<div class="definition" id="definition-scissor-rect">
+  <h2 class="line-text">Scissor Rect</h2>
+  <p>
+    A scissor rect (scissor rectangle) is a screen space rectangular region that restricts rendering so that only pixels within the rectangle are drawn. Any fragment that falls outside the scissor rect is discarded before it reaches the depth test, stencil test, or color write stages, making it a very cheap early rejection mechanism. Scissor rects are commonly used for UI rendering (restricting a text or image draw to a panel's bounds), split screen multiplayer (limiting each player's rendering to their viewport), light optimization (restricting a full screen lighting pass to only the screen space bounding box of a light's area of influence), and debug visualization. The scissor test is a fixed function feature of the GPU pipeline and can be set independently of the viewport.
+  </p>
+</div>
+
+<div class="definition" id="definition-viewport">
+  <h2 class="line-text">Viewport</h2>
+  <p>
+    A viewport defines the rectangular region of the render target that the GPU maps the normalized clip space output to. After vertex transformation, all geometry exists in a normalized coordinate space ranging from negative one to one. The viewport transform maps these coordinates to actual pixel coordinates within the render target, defining the position, width, height, and depth range of the rendered output. Changing the viewport allows engines to render to a sub region of a render target, which is used for split screen rendering, picture in picture displays, cube map face rendering (rendering each face of a cube map into one region of an atlas), and VR where each eye renders to a different half of the output. Unlike the scissor rect, which simply clips pixels, the viewport actually transforms the geometry coordinates so that the full rendered scene fits within the specified region.
+  </p>
+</div>
+
+<div class="definition" id="definition-hi-z-buffer">
+  <h2 class="line-text">Hi Z Buffer (Hierarchical Z Buffer)</h2>
+  <p>
+    A hierarchical Z buffer is a mip mapped version of the depth buffer used to accelerate depth testing and occlusion culling. Each mip level stores the maximum (or minimum, depending on the implementation) depth value of the corresponding group of pixels from the level below, creating a pyramid of progressively coarser depth information. This allows large screen space regions to be tested against a single depth value at a low mip level rather than testing every pixel individually. If a bounding box of an object is entirely behind the conservative depth at a coarse mip level, the object is guaranteed to be occluded and can be skipped without any per pixel testing. The Hi Z buffer is used both in hardware early Z rejection (where the GPU can skip fragments before the fragment shader runs) and in software GPU driven occlusion culling (where a compute shader tests object bounding boxes against the Hi Z pyramid to decide what to draw).
+  </p>
+</div>
+
+<div class="definition" id="definition-swap-chain">
+  <h2 class="line-text">Swap Chain</h2>
+  <p>
+    A swap chain is a set of two or more frame buffers that the GPU and display cycle through to present rendered frames on screen. At any given moment, one buffer (the front buffer) is being read by the display while another (the back buffer) is being written to by the GPU. When a frame is finished rendering, the buffers are swapped so the newly completed image becomes the displayed one and the previously displayed buffer becomes available for the next frame. With two buffers (double buffering), tearing can occur if the swap happens mid refresh, which is solved by synchronizing swaps with the display's vertical blank interval (VSync). Triple buffering adds a third buffer so the GPU does not have to stall waiting for VSync, reducing latency while still preventing tearing. The swap chain is a fundamental concept in all modern graphics APIs including Vulkan, DirectX 12, and Metal, where the application is responsible for creating and managing it explicitly. The presentation mode of the swap chain (such as immediate, FIFO, or mailbox) determines how frames are queued and when they are displayed, directly affecting the trade off between input latency, frame pacing, and tearing.
+  </p>
+</div>
+
+<h2 class="section-header">Spatial Data Structures</h2>
+
+<div class="definition" id="definition-spatial-data-structures">
+  <h2 class="line-text">Spatial Data Structures in Rendering</h2>
+  <p>
+    Rendering a complex 3D scene efficiently requires knowing which objects, triangles, or volumes are relevant to a given query, whether that query is a camera frustum test, a ray intersection, a physics overlap, or a light influence check. Testing every element in the scene against every query is prohibitively expensive, so engines organize spatial data into hierarchical structures that allow large portions of the scene to be skipped quickly. These structures work by recursively subdividing space or grouping nearby objects together so that a single test against a parent node can eliminate many children at once. The choice of data structure depends on the type of query, whether the scene is static or dynamic, and whether the structure needs to run on the CPU or GPU.
+  </p>
+</div>
+
+<div class="definition" id="definition-bvh">
+  <h2 class="line-text">BVH (Bounding Volume Hierarchy)</h2>
+  <p>
+    A bounding volume hierarchy is a tree structure where each node contains a bounding volume (usually an axis aligned bounding box) that encloses all the geometry in its child nodes. The root node's bounding box encompasses the entire scene, and each level subdivides the geometry into tighter groups until the leaf nodes contain individual triangles or small clusters. To perform a query such as a ray intersection test, the algorithm starts at the root and tests the ray against the bounding box. If the ray misses the box, the entire subtree is skipped. If it hits, the algorithm recurses into the children. This allows the vast majority of the scene's triangles to be skipped in logarithmic time. BVHs are the primary acceleration structure used in hardware accelerated ray tracing (DirectX Raytracing and Vulkan Ray Tracing both require a two level BVH), and they are also widely used for frustum culling, physics broadphase collision detection, and mouse picking. BVHs handle dynamic scenes reasonably well because individual nodes can be refitted when objects move without rebuilding the entire tree.
+  </p>
+</div>
+
+<div class="definition" id="definition-aabb">
+  <h2 class="line-text">AABB (Axis Aligned Bounding Box)</h2>
+  <p>
+    An axis aligned bounding box is the simplest and most common bounding volume, defined by a minimum and maximum point along each of the three world axes. The resulting box is always aligned to the X, Y, and Z axes and never rotates, which makes intersection tests (ray vs AABB, AABB vs AABB, frustum vs AABB) extremely fast using simple min max comparisons. AABBs are used extensively in BVHs, octrees, broadphase collision detection, frustum culling, and Hi Z occlusion queries. The trade off is that an AABB can be a loose fit for objects that are elongated or rotated at an angle, enclosing a significant amount of empty space. Despite this, the speed of AABB tests makes them the default bounding volume in most real time applications.
+  </p>
+</div>
+
+<div class="definition" id="definition-obb">
+  <h2 class="line-text">OBB (Oriented Bounding Box)</h2>
+  <p>
+    An oriented bounding box is a bounding volume similar to an AABB but with an arbitrary rotation, allowing it to fit more tightly around objects that are not aligned to the world axes. An OBB is defined by a center point, three orthogonal axes representing its orientation, and three half extents representing its size along each axis. Because the box can rotate to match the shape of the enclosed object, it typically encloses much less empty space than an AABB for elongated or angled geometry. The trade off is that intersection tests against OBBs are more expensive than AABB tests because they require projecting onto the box's local axes using the separating axis theorem. OBBs are most commonly used in narrowphase collision detection and physics simulations where a tighter fit justifies the extra computation.
+  </p>
+</div>
+
+<div class="definition" id="definition-bounding-sphere">
+  <h2 class="line-text">Bounding Sphere</h2>
+  <p>
+    A bounding sphere is a bounding volume defined by a center point and a radius that encloses an object or group of objects. Intersection tests against bounding spheres are extremely fast, requiring only a distance calculation and a comparison against the radius, making them useful for quick rejection tests. Sphere vs sphere, ray vs sphere, and frustum vs sphere tests are all computationally cheap. Bounding spheres are rotationally invariant, meaning they do not need to be updated when an object rotates, only when it moves or scales. However, they can be a very loose fit for elongated or flat objects, enclosing a large amount of empty space. They are commonly used as a first pass broadphase test before more precise AABB or OBB checks, and for distance based checks like light influence radius and LOD selection.
+  </p>
+</div>
+
+<div class="definition" id="definition-octree">
+  <h2 class="line-text">Octree</h2>
+  <p>
+    An octree is a spatial data structure that recursively subdivides 3D space into eight equally sized child nodes (octants). Starting with a single cube that encompasses the entire scene, each node is split into eight smaller cubes whenever it contains more objects or triangles than a specified threshold. Objects are placed into the smallest node that fully contains them. To perform a spatial query like frustum culling, the algorithm tests the frustum against the root node and recursively descends only into children that intersect the frustum, skipping entire branches that are completely outside. Octrees are well suited for scenes with relatively uniform object distribution and are commonly used for static scene partitioning, broad frustum and visibility queries, and sparse voxel representations. They are less ideal for scenes where objects are clustered in small areas, as the fixed subdivision pattern can create many empty nodes.
+  </p>
+</div>
+
+<div class="definition" id="definition-kd-tree">
+  <h2 class="line-text">KD Tree</h2>
+  <p>
+    A KD tree (k dimensional tree) is a binary space partitioning structure that recursively splits space along one axis at a time using axis aligned splitting planes. At each level of the tree, a single axis (X, Y, or Z) is chosen and the space is divided into two halves at a position determined by a heuristic such as the surface area heuristic (SAH), which optimizes for the most efficient ray traversal. Objects or triangles on each side of the split are assigned to the corresponding child node. KD trees were historically the preferred acceleration structure for offline ray tracing because the SAH produces very efficient traversals for ray intersection queries. They are less common in real time applications today because BVHs have largely replaced them, offering easier construction, better support for dynamic scenes, and hardware level support in ray tracing APIs. KD trees are still used in spatial search problems like nearest neighbor queries.
+  </p>
+</div>
+
+<div class="definition" id="definition-bsp-tree">
+  <h2 class="line-text">BSP Tree (Binary Space Partitioning)</h2>
+  <p>
+    A BSP tree is a hierarchical structure that recursively divides space using arbitrarily oriented planes, splitting the scene into two half spaces at each node. Unlike KD trees which only use axis aligned splits, BSP trees can use planes at any angle, allowing them to align splits with the geometry of the scene. The classic use of BSP trees was in early first person shooters like Doom and Quake, where they were used to sort and render geometry in the correct back to front or front to back order before hardware depth buffers were ubiquitous. BSP trees also enabled efficient visibility determination and collision detection in those engines. Constructing a BSP tree can be expensive and often requires splitting polygons that straddle a partition plane, which increases geometry count. In modern engines, BSP trees have been largely replaced by BVHs and octrees for most tasks, but they are still occasionally used for CSG (constructive solid geometry) operations and certain visibility calculations.
+  </p>
+</div>
+
+<div class="definition" id="definition-uniform-grid">
+  <h2 class="line-text">Uniform Grid</h2>
+  <p>
+    A uniform grid divides space into a regular three dimensional grid of equally sized cells. Each cell stores a list of the objects or triangles that overlap it. To perform a spatial query, only the cells that the query touches need to be examined. For a ray intersection test, the ray is stepped through the grid cell by cell using a traversal algorithm (like the one described by Amanatides and Woo), checking only the geometry in each cell along the way. Uniform grids are simple to build, fast to traverse, and work extremely well when objects are distributed relatively evenly across the scene. They perform poorly in scenes with highly uneven distributions because many cells end up empty while a few cells contain most of the geometry, wasting memory and traversal time. They are commonly used for particle collision, spatial hashing in physics simulations, and voxel based rendering.
+  </p>
+</div>
+
+<div class="definition" id="definition-scene-graph">
+  <h2 class="line-text">Scene Graph</h2>
+  <p>
+    A scene graph is a hierarchical data structure (usually a tree or directed acyclic graph) that organizes all the objects in a scene into a parent child relationship. Each node in the graph stores a local transform (position, rotation, scale) that is relative to its parent, and the final world transform of any object is computed by concatenating the transforms down the chain from root to that node. This means moving a parent node automatically moves all its children, which is useful for things like a character holding a weapon (the weapon is a child of the hand bone) or a planet orbiting a star with moons orbiting the planet. Scene graphs are not a spatial acceleration structure in the same way as BVHs or octrees, but they provide the logical organization of the scene that those structures are built on top of. Most engines traverse the scene graph each frame to update world transforms, collect renderable objects, and feed them into the spatial structures used for culling and rendering.
+  </p>
+</div>
+
+<h2 class="section-header">Transparency</h2>
+
+<div class="definition" id="definition-transparency">
+  <h2 class="line-text">Transparency and the Ordering Problem</h2>
+  <p>
+    Transparency in real time rendering refers to the ability to see through or partially see through surfaces such as glass, water, smoke, or foliage with alpha cutouts. Rendering transparent objects is significantly more complex than rendering opaque ones because of how the depth buffer works. When an opaque object is rendered, its depth is written to the depth buffer and any object behind it is discarded. Transparent objects, however, need to blend their color with whatever is already behind them, which means the objects behind must have been rendered first. This creates the ordering problem: transparent objects must be drawn from back to front (furthest from the camera to nearest) so that each layer blends correctly on top of the one behind it. If they are drawn in the wrong order, closer transparent surfaces may overwrite or fail to blend properly with surfaces further away, producing visible artifacts like objects disappearing behind glass or particles rendering in front of things they should be behind. For opaque geometry, the depth buffer handles ordering automatically regardless of draw order, but for transparent geometry, the engine must explicitly sort and manage the draw order, which adds CPU overhead and can still produce errors when transparent surfaces overlap or intersect each other.
+  </p>
+</div>
+
+<div class="definition" id="definition-alpha-blending">
+  <h2 class="line-text">Alpha Blending</h2>
+  <p>
+    Alpha blending is the standard method for rendering transparent surfaces. Each pixel of a transparent object has an alpha value between 0 (fully transparent) and 1 (fully opaque) that determines how much of the object's color is mixed with the color already in the frame buffer behind it. The blend is typically computed as the transparent object's color multiplied by its alpha plus the background color multiplied by one minus alpha. This produces a smooth, continuous range of transparency and is used for effects like tinted glass, fading particles, and translucent UI elements. Alpha blending requires correct back to front sorting to produce accurate results, and it does not write to the depth buffer in the same way as opaque geometry, which means transparent objects cannot occlude each other through the depth test alone.
+  </p>
+</div>
+
+<div class="definition" id="definition-alpha-testing">
+  <h2 class="line-text">Alpha Testing (Alpha Cutout)</h2>
+  <p>
+    Alpha testing, also called alpha cutout or alpha clip, is a simpler form of transparency where each pixel is either fully opaque or fully discarded based on whether its alpha value is above or below a threshold. There is no partial transparency or blending involved. If the alpha is above the threshold the pixel is rendered as a normal opaque pixel and writes to the depth buffer, and if it is below the threshold the pixel is completely discarded as if that part of the mesh does not exist. This technique is commonly used for foliage, chain link fences, hair cards, and any surface where a texture defines a complex silhouette on a simple piece of geometry. Because alpha tested surfaces write to the depth buffer normally and do not require sorting, they are much cheaper and simpler to render than alpha blended surfaces, though the hard cutoff edge can appear jagged without additional techniques like alpha to coverage.
+  </p>
+</div>
+
+<div class="definition" id="definition-alpha-to-coverage">
+  <h2 class="line-text">Alpha to Coverage</h2>
+  <p>
+    Alpha to coverage is a technique that bridges the gap between alpha testing and alpha blending by using MSAA samples to simulate partial transparency. Instead of a hard binary cutoff like alpha testing, the alpha value of each pixel determines how many of the MSAA sub samples are marked as covered. A pixel with 50% alpha on 4x MSAA would write to two of the four sub samples, and when the samples are resolved, the pixel appears semi transparent. This produces smoother edges on alpha tested geometry like foliage and hair without requiring back to front sorting or true alpha blending. Alpha to coverage only works when MSAA is enabled and the quality of the transition depends on the number of MSAA samples available, so it provides only a few discrete transparency levels rather than a continuous range.
+  </p>
+</div>
+
+<div class="definition" id="definition-depth-peeling">
+  <h2 class="line-text">Depth Peeling</h2>
+  <p>
+    Depth peeling is a technique for rendering order independent transparency by peeling away layers of transparent geometry one at a time from front to back (or back to front). On the first pass, the nearest transparent surface is rendered normally. On each subsequent pass, any fragment that was already captured in a previous pass is discarded using a secondary depth test, revealing the next closest layer. Once all layers have been peeled, the results are composited together in the correct order. This produces accurate transparency without requiring explicit sorting of objects on the CPU. The main drawback is performance, as each layer requires a full additional render pass, meaning scenes with many overlapping transparent layers can become very expensive. Dual depth peeling is an optimization that captures two layers per pass (the nearest and the furthest remaining) to reduce the total number of passes needed.
+  </p>
+</div>
+
+<div class="definition" id="definition-oit">
+  <h2 class="line-text">OIT (Order Independent Transparency)</h2>
+  <p>
+    Order Independent Transparency is a general term for any technique that correctly renders overlapping transparent surfaces without requiring them to be sorted from back to front before drawing. The sorting requirement of traditional alpha blending is error prone and expensive, especially when transparent objects intersect or when many transparent particles overlap. OIT techniques solve this by collecting all transparent fragments per pixel and then sorting or blending them on the GPU after they have all been rendered. Common OIT methods include depth peeling, per pixel linked lists (where each pixel stores a linked list of all transparent fragments that landed on it, which are then sorted and composited in a final pass), and weighted blended OIT (which uses a weighted average based on depth and alpha to approximate correct ordering without explicit sorting, trading accuracy for speed). Each approach has different trade offs in terms of memory usage, performance, and visual accuracy.
+  </p>
+</div>
+
+<div class="definition" id="definition-weighted-blended-oit">
+  <h2 class="line-text">Weighted Blended OIT</h2>
+  <p>
+    Weighted blended order independent transparency is an approximate OIT technique that avoids both explicit sorting and per pixel fragment storage by computing a weighted average of all transparent fragments at each pixel in a single pass. Each transparent fragment contributes its color and alpha to an accumulation buffer, weighted by a function of its depth and opacity so that closer and more opaque fragments have more influence on the final result. A separate buffer tracks the total transmittance. In a compositing pass, the accumulated color is divided by the total weight and blended with the opaque background. Because everything is done additively in a single geometry pass, it is fast, has fixed memory overhead, and is straightforward to implement. The trade off is that it is an approximation and can produce incorrect results when transparent surfaces have very different colors or when the depth weighting function does not suit the scene, but for many common cases like particles, smoke, and tinted windows it produces visually acceptable results at a fraction of the cost of exact OIT methods.
+  </p>
+</div>
+
+<div class="definition" id="definition-screen-door-transparency">
+  <h2 class="line-text">Screen Door Transparency (Dithered Transparency)</h2>
+  <p>
+    Screen door transparency is a technique that simulates transparency by discarding a pattern of pixels from an otherwise opaque surface, allowing whatever is behind it to show through the gaps. The discard pattern is typically a dither matrix (such as a Bayer matrix) applied in screen space, where the density of discarded pixels corresponds to the desired transparency level. A surface at 50% transparency would discard roughly half its pixels in a checkerboard like pattern. Because the remaining pixels are rendered as fully opaque and write to the depth buffer normally, screen door transparency requires no sorting, no blending, and works perfectly in a deferred rendering pipeline. The visual trade off is a noticeable stippled or grainy appearance, especially at lower resolutions, though TAA can smooth this pattern over multiple frames and make it far less visible. It is commonly used for LOD cross fading, dissolve effects, and material transparency in deferred renderers where true alpha blending is impractical.
   </p>
 </div>
 
