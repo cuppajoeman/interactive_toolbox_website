@@ -276,6 +276,62 @@
 
 <h2 class="section-header">Ray Tracing & Path Tracing</h2>
 
+<div class="definition" id="definition-ray-tracing-pipeline">
+  <h2 class="line-text">Ray Tracing Pipeline</h2>
+  <p>
+    The ray tracing pipeline is an alternative to the traditional rasterization pipeline that determines visibility and shading by casting rays into the scene rather than projecting triangles onto the screen. The pipeline begins with a ray generation stage, where a shader (the ray generation shader) is responsible for creating the initial rays, typically one per pixel cast from the camera through the image plane into the scene. Each ray is then tested against an acceleration structure (usually a two level BVH) to find the closest intersection with scene geometry. During traversal, an intersection shader can be invoked to define custom intersection logic for non triangle primitives such as procedural spheres or volumes. When a ray hits geometry, the closest hit shader is executed, which is analogous to the fragment shader in rasterization and is where material evaluation, lighting, and secondary ray spawning (for reflections, refractions, or shadows) occur. If a ray misses all geometry, a miss shader runs instead, typically returning a skybox color or ambient term. For shadow rays or visibility queries, an any hit shader can be invoked at every potential intersection along the ray, allowing the engine to handle transparency or early termination without finding the closest hit. Unlike the rasterization pipeline, which processes geometry in a fixed order through well defined stages, the ray tracing pipeline is fundamentally recursive and divergent, as each closest hit shader can spawn new rays that re enter the pipeline. This flexibility is what makes ray tracing naturally suited to effects like reflections, refractions, global illumination, and accurate shadows, but it also means that execution is less predictable and harder to keep efficient on the GPU compared to the highly uniform workload of rasterization. Modern ray tracing APIs (DirectX Raytracing and Vulkan Ray Tracing) expose all of these shader stages and allow developers to define shader binding tables that map different shaders to different objects in the scene, so a ray hitting a glass surface runs different shading logic than a ray hitting a brick wall.
+  </p>
+</div>
+
+<div class="definition" id="definition-ray-generation-shader">
+  <h2 class="line-text">Ray Generation Shader</h2>
+  <p>
+    The ray generation shader is the entry point of the ray tracing pipeline, analogous to how a full screen dispatch or draw call initiates work in a rasterization based post process. It is invoked once per pixel (or per work item in a dispatch) and is responsible for constructing the initial rays to cast into the scene. For a basic ray traced camera, the shader computes each ray's origin at the camera position and its direction by mapping the pixel coordinate through the inverse of the view projection matrix. The ray generation shader calls a trace ray function to launch the ray into the acceleration structure, and when the result returns (from either a hit or miss shader) it writes the final output to a render target. Beyond primary camera rays, ray generation shaders are also used to initiate specialized passes such as ambient occlusion, ray traced shadows, or diffuse global illumination, each constructing rays with different origins and directions suited to the effect.
+  </p>
+</div>
+
+<div class="definition" id="definition-closest-hit-shader">
+  <h2 class="line-text">Closest Hit Shader</h2>
+  <p>
+    The closest hit shader is invoked when a ray has finished traversing the acceleration structure and the closest intersection point has been determined. It receives information about the hit, including the distance along the ray, the index of the triangle or primitive that was hit, and barycentric coordinates for interpolating vertex attributes like normals, UVs, and tangents. The closest hit shader is where material evaluation and lighting calculations happen, similar to the fragment shader in rasterization. It can also spawn secondary rays by calling trace ray again, for example casting a reflection ray in the mirror direction, a refraction ray through a transparent surface, or a shadow ray toward a light source. This recursive spawning is what enables multi bounce effects like reflections of reflections, though engines typically cap the recursion depth to keep performance manageable.
+  </p>
+</div>
+
+<div class="definition" id="definition-any-hit-shader">
+  <h2 class="line-text">Any Hit Shader</h2>
+  <p>
+    The any hit shader is invoked at every potential intersection along a ray during traversal, not just the closest one. It gives the developer an opportunity to accept or reject each intersection based on custom logic. The most common use is alpha testing, where the shader samples the texture at the hit point and discards the intersection if the alpha value is below a threshold, allowing the ray to continue and find the next intersection behind it. This is essential for foliage, fences, and other alpha cutout geometry that would otherwise cast solid shadows or appear opaque to ray queries. Any hit shaders are also used in transparency handling, where each intersection contributes a partial opacity that is accumulated along the ray. For fully opaque geometry, the any hit shader is typically not needed and can be skipped, which improves traversal performance.
+  </p>
+</div>
+
+<div class="definition" id="definition-miss-shader">
+  <h2 class="line-text">Miss Shader</h2>
+  <p>
+    The miss shader is executed when a ray traverses the entire acceleration structure without hitting any geometry. It is responsible for returning a fallback color or value for that ray. For primary camera rays, the miss shader typically samples a skybox cube map or returns a constant sky color. For shadow rays, a miss indicates that the path to the light is unobstructed, so the miss shader signals that the point is not in shadow. For reflection or global illumination rays, the miss shader might sample an environment map to provide distant lighting contribution. Miss shaders are usually very simple and cheap compared to closest hit shaders, but they play an important role in ensuring that every ray returns a valid result.
+  </p>
+</div>
+
+<div class="definition" id="definition-intersection-shader">
+  <h2 class="line-text">Intersection Shader</h2>
+  <p>
+    An intersection shader defines custom ray intersection logic for non triangle primitives. By default, the ray tracing hardware handles ray triangle intersection using built in fixed function units, which is fast and sufficient for standard mesh geometry. However, when a ray needs to intersect procedural geometry such as spheres, cylinders, fractals, or signed distance field volumes, an intersection shader can be provided that analytically computes the intersection point. The intersection shader is invoked when a ray enters the bounding box of a procedural primitive in the acceleration structure, and it reports whether a hit occurred and at what distance. This allows ray tracing to be used with geometry that does not exist as explicit triangles in memory, which can save significant memory for things like particle volumes, procedural terrain, or massive instanced geometry.
+  </p>
+</div>
+
+<div class="definition" id="definition-acceleration-structure">
+  <h2 class="line-text">Acceleration Structure</h2>
+  <p>
+    An acceleration structure is the spatial data structure that the GPU uses to efficiently find ray intersections during ray tracing. Modern ray tracing APIs use a two level hierarchy. The bottom level acceleration structure (BLAS) contains the actual geometry (triangles or procedural bounding boxes) for individual meshes or objects. The top level acceleration structure (TLAS) contains instances of bottom level structures, each with a transform, allowing the same mesh to appear at many locations without duplicating the geometry data. When a ray is traced, the hardware first traverses the TLAS to find which instances the ray might hit, then descends into the relevant BLAS to test against the actual triangles. This two level design allows dynamic scenes to be updated efficiently, since moving an object only requires updating its transform in the TLAS rather than rebuilding the BLAS. Rebuilding or refitting the TLAS each frame is relatively cheap, while BLAS rebuilds are more expensive and are only needed when the geometry itself deforms.
+  </p>
+</div>
+
+<div class="definition" id="definition-shader-binding-table">
+  <h2 class="line-text">Shader Binding Table</h2>
+  <p>
+    A shader binding table (SBT) is a data structure used in the ray tracing pipeline to map different shader programs and their associated resources to different objects and ray types in the scene. When a ray hits a piece of geometry, the GPU uses the instance index, the geometry index within that instance, and the ray type to look up which closest hit, any hit, or intersection shader to execute, along with the corresponding material data like texture handles and parameter buffers. This allows every object in the scene to have its own unique shading behavior without branching in a single monolithic shader. For example, a glass object might point to a refractive closest hit shader while a brick wall points to a simple opaque one, and shadow rays might use entirely different shaders than primary visibility rays. The shader binding table is populated by the application and is one of the more complex aspects of setting up a ray tracing pipeline in DirectX Raytracing or Vulkan Ray Tracing.
+  </p>
+</div>
+
 <div class="definition" id="definition-ray-tracing">
   <h2 class="line-text">Ray Tracing</h2>
   <p>
