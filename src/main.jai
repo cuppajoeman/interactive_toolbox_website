@@ -373,18 +373,6 @@ draw_guide_content :: (program: *Interactive_Toolbox_Program) {
     }
 }
 
-guide_heading :: (eyebrow: string, title: string, intro: string) {
-    UI.ui_spacing(18);
-    UI.ui_label_colored(eyebrow, JAIDE_BLUE);
-    if title.count > 0 {
-        UI.ui_push_style_float(.FONT_SIZE, ifx UI.ui_available_width() < 620 then 30.0 else 43.0);
-        UI.ui_label_wrapped(title);
-        UI.ui_pop_style_float(.FONT_SIZE);
-    }
-    UI.ui_label_disabled_wrapped(intro);
-    UI.ui_spacing(12);
-}
-
 guide_card_height :: (title: string, body: string, width: float32) -> float32 {
     style := *UI.ui_ctx.style;
     inner_width := max(width - style.padding * 2, 1.0);
@@ -424,12 +412,7 @@ guide_bullet :: (text: string) {
 }
 
 draw_guide_overview :: () {
-    guide_heading(
-        "OVERVIEW",
-        "",
-        "Jaide is a code editor for the Jai programming language with project-oriented editing, Jai-aware parsing, symbol search, navigation, refactoring, and a configurable build workflow."
-    );
-
+    UI.ui_spacing(12);
     guide_card(
         "guide_compiler_callout",
         "THE JAI COMPILER IS REQUIRED",
@@ -440,12 +423,6 @@ draw_guide_overview :: () {
 }
 
 draw_guide_quick_start :: () {
-    guide_heading(
-        "FIRST LAUNCH",
-        "Quick start",
-        "Go from a fresh install to a running Jai program in four steps."
-    );
-
     guide_topic("Select Your Jai Installation", "Choose the root of the Jai installation on first launch. Change it later with Tools > Jai Setup.");
     guide_topic("Open or Create a Project", "Open Project selects an existing directory. Create Project prepares build.jai and src/main.jai in an empty directory.");
     guide_topic("Confirm the Build", "Review the detected command, working directory, and analysis entry. Jaide will not run a detected command until you confirm it.");
@@ -460,12 +437,6 @@ draw_guide_quick_start :: () {
 }
 
 draw_guide_interface :: () {
-    guide_heading(
-        "WORKSPACE MAP",
-        "Interface tour",
-        "The main window stays compact: controls at the top, project context around the editor, and transient results in focused windows."
-    );
-
     guide_topic("Project Tree", "Browse directories, click files to open them, or click folders to expand them. Right-click files to rename or delete them, and drag files into folders or back to the project root. Moves and renames never overwrite an existing destination, and directory symlinks are not traversed or accepted as move targets. Drag the divider to resize the panel.");
     guide_topic("Workspace Tabs and Shared Documents", "The numbered tabs are workspace tabs, not one-file-only tabs. Each tab remembers its pane arrangement and active view. Use + for a new workspace and x to close one. When the same file is visible twice, edits are shared but cursor, selection, scroll, and zoom stay pane-local.");
     guide_topic("Editor Panes", "A pane is a window configuration that can view any file; it is not tied to one specific file. Every pane keeps its own cursor, selection, scroll position, and font size.");
@@ -480,12 +451,6 @@ draw_guide_interface :: () {
 }
 
 draw_guide_language_tools :: () {
-    guide_heading(
-        "JAI-AWARE EDITING",
-        "Jai language tools",
-        "A companion programming server provides parsing, indexing, name resolution, document symbols, semantic tokens, references, and rename operations."
-    );
-
     guide_topic("Go to definition", "Double-click an identifier to open its declaration in the active pane. The destination is centered and the origin enters jump history. Double-right-click to return.");
     guide_topic("Show usages and rename", "Shift-click opens all resolved occurrences with source previews. Ctrl-click opens the same project-aware list in rename mode. Enter a valid Jai identifier and apply Rename to update the declaration and references.");
     guide_topic("Imports and loaded files", "Double-click the quoted path in #load to open a file relative to the current source. Double-click an #import module string to open it from the configured Jai installation.");
@@ -497,12 +462,6 @@ draw_guide_language_tools :: () {
 }
 
 draw_guide_find_and_navigate :: () {
-    guide_heading(
-        "SEARCH",
-        "Find and navigate",
-        "Use in-file search for literal text and the Go to window for fuzzy file and symbol navigation."
-    );
-
     guide_topic("Find in the current file", "Press Ctrl + F, type a text query, then use Enter for the next match or Shift + Enter for the previous match. Search wraps at either end. Press Esc to close it.");
     guide_topic("Go to files and symbols", "Press Ctrl + P or use Navigate > Go to. Fuzzy search mixes files, procedures, types, and variables. Type to refine, use arrow keys or Tab to move, Enter to open, and Esc to cancel.");
 
@@ -518,12 +477,6 @@ draw_guide_find_and_navigate :: () {
 }
 
 draw_guide_build_and_run :: () {
-    guide_heading(
-        "PROJECT WORKFLOW",
-        "Build and run",
-        "Build commands are project-specific and must be confirmed once. Jaide keeps the saved command separate from the project repository."
-    );
-
     guide_topic("Automatic build detection", "Jaide first looks for a conventional top-level build.jai, then other top-level Jai build metaprograms, common build scripts for the current platform, and finally a single first.jai, main.jai, or sole Jai source file. If several candidates are found, choose one from Detected. Jaide never runs a detected command until you confirm it.");
 
     UI.ui_spacing(16);
@@ -555,12 +508,7 @@ guide_key_row :: (keys: string, action: string) {
 }
 
 draw_guide_keybindings :: () {
-    guide_heading(
-        "SHORTCUT REFERENCE",
-        "All current keybindings",
-        "Jaide uses Ctrl as the primary modifier on every platform."
-    );
-
+    UI.ui_spacing(12);
     UI.ui_separator_text("GLOBAL AND PROJECT");
     UI.ui_begin_table("global_key_table", 2);
     UI.ui_table_header_row(string.["KEYS", "ACTION"]);
@@ -609,12 +557,6 @@ draw_guide_keybindings :: () {
 }
 
 draw_guide_configuration :: () {
-    guide_heading(
-        "LOCAL STATE",
-        "Configuration and saved state",
-        "Jaide keeps machine-specific paths and editor state outside your source code."
-    );
-
     guide_topic("Application configuration", "Use Tools > Open Application Config to edit data/cfg.ini. Saving reloads it immediately.");
     UI.ui_begin_panel("application_config", 220);
     UI.ui_label_colored("data/cfg.ini", JAIDE_BLUE);
@@ -646,12 +588,6 @@ draw_guide_configuration :: () {
 }
 
 draw_guide_troubleshooting :: () {
-    guide_heading(
-        "COMMON FIXES",
-        "Troubleshooting",
-        "Start with these checks for the most common setup, build, and navigation problems."
-    );
-
     guide_topic("Language Navigation or Outline Is Unavailable", "Confirm Tools > Jai Setup points to the Jai installation root and that the programming executable is beside Jaide. For a custom layout, verify the Analysis entry.");
     guide_topic("Build Asks for Confirmation Every Time", "Open Project > Configure Build, make sure Command is not empty, and press Save. If the project moved, reopen it from the new path.");
     guide_topic("Build Succeeds, but Run Cannot Find the Executable", "Run expects bin/<project-folder-name>. Adjust the build output to match. The Create Project template already follows this convention.");
@@ -668,7 +604,7 @@ draw_guide_troubleshooting :: () {
 }
 
 draw_guide_pending_section :: (section: s32) {
-    guide_heading("JAIDE USER GUIDE", JAIDE_SECTION_NAMES[section], "This section is being adapted to the Interactive Toolbox UI.");
+    guide_topic(JAIDE_SECTION_NAMES[section], "This section is not available.");
 }
 
 vertex :: inline (position: WebGL_Vector3, normal: WebGL_Vector3, color: WebGL_Vector3) -> WebGL_Vertex {
