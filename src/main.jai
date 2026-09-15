@@ -488,9 +488,8 @@ draw_guide_language_tools :: () {
 
     guide_topic("Go to definition", "Double-click an identifier to open its declaration in the active pane. The destination is centered and the origin enters jump history. Double-right-click to return.");
     guide_topic("Show usages and rename", "Shift-click opens all resolved occurrences with source previews. Ctrl-click opens the same project-aware list in rename mode. Enter a valid Jai identifier and apply Rename to update the declaration and references.");
-    guide_topic("Imports and loaded files", "Double-click the quoted path in #load to open a file relative to the current source. Double-click an #import module string to open it from the configured Jai installation. Local tbx imports resolve inside the project's src tree.");
+    guide_topic("Imports and loaded files", "Double-click the quoted path in #load to open a file relative to the current source. Double-click an #import module string to open it from the configured Jai installation.");
     guide_topic("Compiler-provided symbols", "When a construct has no source declaration, Jaide can open Builtin Info instead. This covers common types, constants, context forms, and metaprogramming directives such as #run, #expand, and #module_parameters.");
-    guide_topic("Declaration notes", "Jai notes use @Name or @Name(arguments). Jaide colors the whole note like a comment. Custom metadata such as @NoProfile gets its behavior from the project's metaprogram, module, or application.");
 
     guide_topic("Semantic highlighting", "Lexical color appears immediately. The programming server then refines resolved identifiers into types, procedures, parameters, variables, properties, macros, constants, and declarations.");
     guide_topic("While you type", "Jaide shifts unaffected semantic ranges across edits, uses lexical color for the active token, and refreshes semantic highlighting and the outline after a short delay.");
