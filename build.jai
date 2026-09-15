@@ -1,5 +1,7 @@
 // Build the Interactive Toolbox site as a WebAssembly module.
 
+GITHUB_PAGES_DOMAIN :: "interactive-toolbox.com";
+
 #run {
     set_build_options_dc(.{do_output = false});
 
@@ -52,6 +54,8 @@ copy_site_files :: () {
     copy_site_file("site/index.html", "dist/jaide/index.html");
     copy_site_file("site/favicon.svg", "dist/favicon.svg");
     copy_site_file("assets/fonts/pt_mono/atlas.png", "dist/atlas.png");
+    write_site_file("dist/.nojekyll", "");
+    write_site_file("dist/CNAME", tprint("%\n", GITHUB_PAGES_DOMAIN));
 }
 
 copy_site_file :: (source_path: string, destination_path: string) {
@@ -64,6 +68,12 @@ copy_site_file :: (source_path: string, destination_path: string) {
 
     if !write_entire_file(destination_path, contents) {
         compiler_report(tprint("Could not write site asset: %", destination_path), mode = .ERROR);
+    }
+}
+
+write_site_file :: (destination_path: string, contents: string) {
+    if !write_entire_file(destination_path, contents) {
+        compiler_report(tprint("Could not write site file: %", destination_path), mode = .ERROR);
     }
 }
 
