@@ -1,0 +1,3 @@
+[submodule "src/tbx"]
+	path = src/tbx
+	url = git@github.com:jai-toolbox/tbx.git
