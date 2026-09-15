@@ -270,8 +270,8 @@ function resize(instance) {
 
 async function start() {
     const [wasmResponse, packageResponse] = await Promise.all([
-        fetch("main.wasm?v=20260915q"),
-        fetch("assets.package?v=20260915q"),
+        fetch("main.wasm?v=20260915r"),
+        fetch("assets.package?v=20260915r"),
     ]);
     if (!wasmResponse.ok) throw new Error(`Could not load main.wasm (${wasmResponse.status}).`);
     if (!packageResponse.ok) throw new Error(`Could not load assets.package (${packageResponse.status}).`);
@@ -283,14 +283,14 @@ async function start() {
     // Jai's exported program entry point has C's (argc, argv) shape. Because
     // argv is a wasm64 pointer, JavaScript passes it as a BigInt.
     instance.exports.main(0, 0n);
-    const atlasTextureHandle = await loadTexture("atlas.png?v=20260915q");
+    const atlasTextureHandle = await loadTexture("atlas.png?v=20260915r");
     instance.exports.set_msdf_atlas_texture_input(atlasTextureHandle);
 
     const normalizedPath = () => window.location.pathname.replace(/\/+$/, "") || "/";
     const pageFromPath = () => normalizedPath() === "/jaide" ? 1 : 0;
     const pathFromPage = page => page === 1 ? "/jaide" : "/";
     const setPageMetadata = page => {
-        document.title = page === 1 ? "Jaide — Interactive Toolbox" : "Interactive Toolbox";
+        document.title = "Interactive Toolbox";
         const description = document.querySelector('meta[name="description"]');
         if (description) {
             description.content = page === 1
