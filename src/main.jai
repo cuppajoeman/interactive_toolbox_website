@@ -591,16 +591,29 @@ draw_guide_configuration :: () {
     UI.ui_end_panel();
 
     guide_topic("Project configuration", "Confirmed build settings live in a path-keyed file under data/project_settings. This avoids modifying an external project just to use Jaide.");
-    UI.ui_begin_panel("project_config", 260);
-    UI.ui_label_colored("PROJECT SETTINGS", JAIDE_BLUE);
+    UI.ui_begin_panel("project_config", 360);
+    UI.ui_label_colored("Project settings", JAIDE_BLUE);
     UI.ui_separator();
+
+    UI.ui_begin_scroll_region_ex("project_config_contents", 280, 4);
     UI.ui_label("[project]");
+    UI.ui_label_disabled_wrapped("# Absolute path used to identify the project and validate its saved settings.");
     UI.ui_label_disabled("root = /path/to/project");
+
+    UI.ui_spacing(8);
     UI.ui_label("[build]");
+    UI.ui_label_disabled_wrapped("# Allows Jaide to reuse this build command without asking for confirmation again.");
     UI.ui_label_disabled("confirmed = true");
+    UI.ui_label_disabled_wrapped("# Command executed by Build. ${jai} expands to the configured Jai compiler.");
     UI.ui_label_disabled("command = ${jai} build.jai");
+    UI.ui_label_disabled_wrapped("# Directory where the command runs, relative to the project root.");
     UI.ui_label_disabled("working_directory = .");
+    UI.ui_label_disabled_wrapped("# Jai source file used as the starting point for project analysis.");
     UI.ui_label_disabled("analysis_entry = build.jai");
+    UI.ui_label_disabled_wrapped("# Records why Jaide selected or suggested this build command.");
+    UI.ui_label_disabled_wrapped("detection_reason = Found the conventional top-level build.jai file.");
+    UI.ui_spacing(18);
+    UI.ui_end_scroll_region();
     UI.ui_end_panel();
 
     guide_topic("Recent projects and portable builds", "Up to eight valid recent project directories are retained. Packaged builds anchor their writable data directory beside the Jaide executable, so shortcuts do not depend on the shell's working directory.");
