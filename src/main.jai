@@ -560,16 +560,34 @@ draw_guide_keybindings :: () {
 
 draw_guide_configuration :: () {
     guide_topic("Application configuration", "Use Tools > Open Application Config to edit data/cfg.ini. Saving reloads it immediately.");
-    UI.ui_begin_panel("application_config", 220);
+    UI.ui_begin_panel("application_config", 360);
     UI.ui_label_colored("data/cfg.ini", JAIDE_BLUE);
     UI.ui_separator();
+
+    UI.ui_begin_scroll_region_ex("application_config_contents", 280, 4);
     UI.ui_label("[jai]");
+    UI.ui_label_disabled_wrapped("# Root folder of your Jai installation. Used to find the compiler and standard modules.");
     UI.ui_label_disabled("jai_path = /path/to/jai");
+
+    UI.ui_spacing(8);
     UI.ui_label("[editor]");
+    UI.ui_label_disabled_wrapped("# Lines moved by a normal vertical mouse-wheel step.");
     UI.ui_label_disabled("scroll_lines = 4");
+    UI.ui_label_disabled_wrapped("# Lines moved when fast scrolling with Shift + mouse wheel.");
     UI.ui_label_disabled("fast_scroll_lines = 10");
+
+    UI.ui_spacing(8);
     UI.ui_label("[recent_projects]");
+    UI.ui_label_disabled_wrapped("# Jaide maintains these eight slots automatically. project_0 is the most recently opened project.");
     UI.ui_label_disabled("project_0 = /path/to/a/project");
+    UI.ui_label_disabled("project_1 =");
+    UI.ui_label_disabled("project_2 =");
+    UI.ui_label_disabled("project_3 =");
+    UI.ui_label_disabled("project_4 =");
+    UI.ui_label_disabled("project_5 =");
+    UI.ui_label_disabled("project_6 =");
+    UI.ui_label_disabled("project_7 =");
+    UI.ui_end_scroll_region();
     UI.ui_end_panel();
 
     guide_topic("Project configuration", "Confirmed build settings live in a path-keyed file under data/project_settings. This avoids modifying an external project just to use Jaide.");
