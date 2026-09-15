@@ -261,7 +261,6 @@ JAIDE_SECTION_NAMES :: string.[
     "INTERFACE",
     "LANGUAGE TOOLS",
     "FIND & NAVIGATE",
-    "FILES & PANES",
     "BUILD & RUN",
     "KEYBINDINGS",
     "CONFIGURATION",
@@ -366,11 +365,10 @@ draw_guide_content :: (program: *Interactive_Toolbox_Program) {
         case 2; draw_guide_interface();
         case 3; draw_guide_language_tools();
         case 4; draw_guide_find_and_navigate();
-        case 5; draw_guide_files_and_panes();
-        case 6; draw_guide_build_and_run();
-        case 7; draw_guide_keybindings();
-        case 8; draw_guide_configuration();
-        case 9; draw_guide_troubleshooting();
+        case 5; draw_guide_build_and_run();
+        case 6; draw_guide_keybindings();
+        case 7; draw_guide_configuration();
+        case 8; draw_guide_troubleshooting();
         case; draw_guide_pending_section(program.jaide_section);
     }
 }
@@ -509,6 +507,10 @@ draw_guide_interface :: () {
     );
 
     guide_topic("Project tree actions", "Click a file to open it or a directory to expand it. Right-click files to rename or delete them, and drag files into folders or back to the project root. Moves and renames never overwrite an existing destination, and directory symlinks are not traversed or accepted as move targets.");
+    guide_topic("Workspace tabs and shared documents", "The numbered tabs are workspace tabs, not one-file-only tabs. A tab owns an editor layout with one or more panes, and each pane can switch between files without changing its layout role. When the same file is visible twice, edits are shared but cursor, selection, scroll, and zoom stay pane-local.");
+    guide_topic("Create and resize split panes", "Move near a pane edge until a subtle handle appears. Drag inward and release on the highlighted preview. Drag the divider to resize. Use a pane's x to close one view; the final pane cannot be closed this way.");
+    guide_topic("Swap panes", "Hold Ctrl + Alt, drag from one pane, and release over another pane in the same tab. Release over the source, outside the panes, or press Esc to cancel.");
+    guide_topic("Persistent undo", "Jaide stores an undo sidecar for each opened file. Cursor, selection, undo, and redo are restored only when the on-disk contents still match.");
     guide_topic("Show or hide supporting panels", "Use View > Toggle Project Tree and View > Toggle Outline. Both side panels have draggable dividers. View > Enable Line Wrap wraps long lines; disabling it restores horizontal scrolling.");
     UI.ui_spacing(30);
 }
@@ -551,20 +553,6 @@ draw_guide_find_and_navigate :: () {
         "DIRECT FILE-FINDER SHORTCUTS",
         "Ctrl + Space searches open files. Shift + Space searches project files. Ctrl + Shift + Space searches the configured Jai modules."
     );
-    UI.ui_spacing(30);
-}
-
-draw_guide_files_and_panes :: () {
-    guide_heading(
-        "WORKSPACE",
-        "Files, tabs, and panes",
-        "Each pane is an independent window configuration that can view any file; it is not tied to a specific file. One file can appear in several panes while each pane keeps its own viewing state."
-    );
-
-    guide_topic("Workspace tabs and shared documents", "The numbered tabs are workspace tabs, not one-file-only tabs. A tab owns an editor layout with one or more panes, and each pane can switch between files without changing its layout role. When the same file is visible twice, edits are shared but cursor, selection, scroll, and zoom stay pane-local.");
-    guide_topic("Create and resize split panes", "Move near a pane edge until a subtle handle appears. Drag inward and release on the highlighted preview. Drag the divider to resize. Use a pane's x to close one view; the final pane cannot be closed this way.");
-    guide_topic("Swap panes", "Hold Ctrl + Alt, drag from one pane, and release over another pane in the same tab. Release over the source, outside the panes, or press Esc to cancel.");
-    guide_topic("Persistent undo", "Jaide stores an undo sidecar for each opened file. Cursor, selection, undo, and redo are restored only when the on-disk contents still match.");
     UI.ui_spacing(30);
 }
 
