@@ -376,9 +376,11 @@ draw_guide_content :: (program: *Interactive_Toolbox_Program) {
 guide_heading :: (eyebrow: string, title: string, intro: string) {
     UI.ui_spacing(18);
     UI.ui_label_colored(eyebrow, JAIDE_BLUE);
-    UI.ui_push_style_float(.FONT_SIZE, ifx UI.ui_available_width() < 620 then 30.0 else 43.0);
-    UI.ui_label_wrapped(title);
-    UI.ui_pop_style_float(.FONT_SIZE);
+    if title.count > 0 {
+        UI.ui_push_style_float(.FONT_SIZE, ifx UI.ui_available_width() < 620 then 30.0 else 43.0);
+        UI.ui_label_wrapped(title);
+        UI.ui_pop_style_float(.FONT_SIZE);
+    }
     UI.ui_label_disabled_wrapped(intro);
     UI.ui_spacing(12);
 }
@@ -449,7 +451,7 @@ guide_bullet :: (text: string) {
 draw_guide_overview :: () {
     guide_heading(
         "OVERVIEW",
-        "A code editor for Jai",
+        "",
         "Jaide is a code editor for the Jai programming language with project-oriented editing, Jai-aware parsing, symbol search, navigation, refactoring, and a configurable build workflow."
     );
 
