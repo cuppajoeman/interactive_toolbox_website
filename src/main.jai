@@ -406,31 +406,6 @@ guide_card :: (id: string, title: string, body: string, height: float32 = 0) {
     UI.ui_end_panel();
 }
 
-guide_two_cards :: (first_id: string, first_title: string, first_body: string,
-                    second_id: string, second_title: string, second_body: string) {
-    available := UI.ui_available_width();
-    if available < 680 {
-        guide_card(first_id, first_title, first_body);
-        guide_card(second_id, second_title, second_body);
-        return;
-    }
-
-    card_width := (available - UI.ui_ctx.style.item_spacing) * 0.5;
-    row_height := max(
-        guide_card_height(first_title, first_body, card_width),
-        guide_card_height(second_title, second_body, card_width)
-    );
-
-    UI.ui_begin_row();
-    UI.ui_begin_column(card_width);
-    guide_card(first_id, first_title, first_body, row_height);
-    UI.ui_end_column();
-    UI.ui_begin_column(card_width);
-    guide_card(second_id, second_title, second_body, row_height);
-    UI.ui_end_column();
-    UI.ui_end_row();
-}
-
 guide_topic :: (title: string, body: string) {
     UI.ui_spacing(12);
     UI.ui_push_style_float(.FONT_SIZE, 19);
@@ -471,18 +446,14 @@ draw_guide_quick_start :: () {
         "Go from a fresh install to a running Jai program in four steps."
     );
 
-    guide_two_cards(
-        "quick_jai", "01 / SELECT YOUR JAI INSTALLATION", "Choose the root of the Jai installation on first launch. Change it later with Tools > Jai Setup.",
-        "quick_project", "02 / OPEN OR CREATE A PROJECT", "Open Project selects an existing directory. Create Project prepares build.jai and src/main.jai in an empty directory."
-    );
-    guide_two_cards(
-        "quick_build", "03 / CONFIRM THE BUILD", "Review the detected command, working directory, and analysis entry. Jaide will not run a detected command until you confirm it.",
-        "quick_run", "04 / BUILD, THEN RUN", "Press Ctrl + B or click Build. When it succeeds, click Run. Build output locations jump to the reported file and line."
-    );
+    guide_topic("Select Your Jai Installation", "Choose the root of the Jai installation on first launch. Change it later with Tools > Jai Setup.");
+    guide_topic("Open or Create a Project", "Open Project selects an existing directory. Create Project prepares build.jai and src/main.jai in an empty directory.");
+    guide_topic("Confirm the Build", "Review the detected command, working directory, and analysis entry. Jaide will not run a detected command until you confirm it.");
+    guide_topic("Build, Then Run", "Press Ctrl + B or click Build. When it succeeds, click Run. Build output locations jump to the reported file and line.");
 
     guide_callout(
         "quick_file_note",
-        "A SINGLE FILE DOES NOT REQUIRE A PROJECT",
+        "A Single File Does Not Require a Project",
         "Use File > Open File when you only want to edit text. Project search, build settings, the tree, and full language indexing become available after opening a project."
     );
     UI.ui_spacing(30);
@@ -495,25 +466,16 @@ draw_guide_interface :: () {
         "The main window stays compact: controls at the top, project context around the editor, and transient results in focused windows."
     );
 
-    guide_two_cards(
-        "interface_tree", "Project Tree", "Browse directories, open files, rename or delete files, and drag files between folders. Drag the divider to resize the panel.",
-        "interface_tabs", "Workspace Tabs", "Each numbered tab remembers its pane arrangement and active view. Use + for a new workspace and x to close one."
-    );
-    guide_two_cards(
-        "interface_edit", "Editor Panes", "A pane is a window configuration that can view any file; it is not tied to one specific file. Every pane keeps its own cursor, selection, scroll position, and font size.",
-        "interface_outline", "File Outline", "See the current Jai file's types, file-level variables, and procedures. Collapse groups or click an entry to jump."
-    );
-    guide_two_cards(
-        "interface_results", "Result Windows", "Go to, usages, rename, build output, run output, compiler explanations, and setup appear in movable focused windows.",
-        "interface_status", "Status Bar", "Shows the active path, dirty marker, line and column, editor messages, local time, and frame rate."
-    );
-
-    guide_topic("Project tree actions", "Click a file to open it or a directory to expand it. Right-click files to rename or delete them, and drag files into folders or back to the project root. Moves and renames never overwrite an existing destination, and directory symlinks are not traversed or accepted as move targets.");
-    guide_topic("Workspace tabs and shared documents", "The numbered tabs are workspace tabs, not one-file-only tabs. A tab owns an editor layout with one or more panes, and each pane can switch between files without changing its layout role. When the same file is visible twice, edits are shared but cursor, selection, scroll, and zoom stay pane-local.");
-    guide_topic("Create and resize split panes", "Move near a pane edge until a subtle handle appears. Drag inward and release on the highlighted preview. Drag the divider to resize. Use a pane's x to close one view; the final pane cannot be closed this way.");
-    guide_topic("Swap panes", "Hold Ctrl + Alt, drag from one pane, and release over another pane in the same tab. Release over the source, outside the panes, or press Esc to cancel.");
-    guide_topic("Persistent undo", "Jaide stores an undo sidecar for each opened file. Cursor, selection, undo, and redo are restored only when the on-disk contents still match.");
-    guide_topic("Show or hide supporting panels", "Use View > Toggle Project Tree and View > Toggle Outline. Both side panels have draggable dividers. View > Enable Line Wrap wraps long lines; disabling it restores horizontal scrolling.");
+    guide_topic("Project Tree", "Browse directories, click files to open them, or click folders to expand them. Right-click files to rename or delete them, and drag files into folders or back to the project root. Moves and renames never overwrite an existing destination, and directory symlinks are not traversed or accepted as move targets. Drag the divider to resize the panel.");
+    guide_topic("Workspace Tabs and Shared Documents", "The numbered tabs are workspace tabs, not one-file-only tabs. Each tab remembers its pane arrangement and active view. Use + for a new workspace and x to close one. When the same file is visible twice, edits are shared but cursor, selection, scroll, and zoom stay pane-local.");
+    guide_topic("Editor Panes", "A pane is a window configuration that can view any file; it is not tied to one specific file. Every pane keeps its own cursor, selection, scroll position, and font size.");
+    guide_topic("Create and Resize Split Panes", "Move near a pane edge until a subtle handle appears. Drag inward and release on the highlighted preview. Drag the divider to resize. Use a pane's x to close one view; the final pane cannot be closed this way.");
+    guide_topic("Swap Panes", "Hold Ctrl + Alt, drag from one pane, and release over another pane in the same tab. Release over the source, outside the panes, or press Esc to cancel.");
+    guide_topic("File Outline", "See the current Jai file's types, file-level variables, and procedures. Collapse groups or click an entry to jump.");
+    guide_topic("Result Windows", "Go to, usages, rename, build output, run output, compiler explanations, and setup appear in movable focused windows.");
+    guide_topic("Status Bar", "Shows the active path, dirty marker, line and column, editor messages, local time, and frame rate.");
+    guide_topic("Persistent Undo", "Jaide stores an undo sidecar for each opened file. Cursor, selection, undo, and redo are restored only when the on-disk contents still match.");
+    guide_topic("Show or Hide Supporting Panels", "Use View > Toggle Project Tree and View > Toggle Outline. Both side panels have draggable dividers. View > Enable Line Wrap wraps long lines; disabling it restores horizontal scrolling.");
     UI.ui_spacing(30);
 }
 
@@ -530,8 +492,8 @@ draw_guide_language_tools :: () {
     guide_topic("Compiler-provided symbols", "When a construct has no source declaration, Jaide can open Builtin Info instead. This covers common types, constants, context forms, and metaprogramming directives such as #run, #expand, and #module_parameters.");
     guide_topic("Declaration notes", "Jai notes use @Name or @Name(arguments). Jaide colors the whole note like a comment. Custom metadata such as @NoProfile gets its behavior from the project's metaprogram, module, or application.");
 
-    guide_callout("language_semantic", "SEMANTIC HIGHLIGHTING", "Lexical color appears immediately. The programming server then refines resolved identifiers into types, procedures, parameters, variables, properties, macros, constants, and declarations.");
-    guide_callout("language_typing", "WHILE YOU TYPE", "Jaide shifts unaffected semantic ranges across edits, uses lexical color for the active token, and refreshes semantic highlighting and the outline after a short delay.");
+    guide_topic("Semantic highlighting", "Lexical color appears immediately. The programming server then refines resolved identifiers into types, procedures, parameters, variables, properties, macros, constants, and declarations.");
+    guide_topic("While you type", "Jaide shifts unaffected semantic ranges across edits, uses lexical color for the active token, and refreshes semantic highlighting and the outline after a short delay.");
     UI.ui_spacing(30);
 }
 
@@ -545,14 +507,12 @@ draw_guide_find_and_navigate :: () {
     guide_topic("Find in the current file", "Press Ctrl + F, type a text query, then use Enter for the next match or Shift + Enter for the previous match. Search wraps at either end. Press Esc to close it.");
     guide_topic("Go to files and symbols", "Press Ctrl + P or use Navigate > Go to. Fuzzy search mixes files, procedures, types, and variables. Type to refine, use arrow keys or Tab to move, Enter to open, and Esc to cancel.");
 
-    guide_two_cards(
-        "find_kind", "FILTER BY KIND", "Choose All, Files, Procedures, Types, or Variables. Procedure results include compact signatures and file locations.",
-        "find_scope", "FILTER BY SCOPE", "Choose Current file / Open files, Project, or Jai modules. Project and module catalogs come from the programming server."
-    );
+    guide_topic("Filter by Kind", "Choose All, Files, Procedures, Types, or Variables. Procedure results include compact signatures and file locations.");
+    guide_topic("Filter by Scope", "Choose Current file / Open files, Project, or Jai modules. Project and module catalogs come from the programming server.");
 
     guide_callout(
         "find_shortcuts",
-        "DIRECT FILE-FINDER SHORTCUTS",
+        "Direct File-Finder Shortcuts",
         "Ctrl + Space searches open files. Shift + Space searches project files. Ctrl + Shift + Space searches the configured Jai modules."
     );
     UI.ui_spacing(30);
@@ -578,7 +538,7 @@ draw_guide_build_and_run :: () {
 
     guide_topic("Building", "Click Build or press Ctrl + B. If files are unsaved, choose Save, Save All, or Done to continue with the on-disk state. The Build Result window captures output and makes recognized source locations clickable.");
     guide_topic("Running", "Run launches the expected executable from bin/<project-folder-name>, uses the project root as its working directory, and streams output into the Run Output window. Use Stop to terminate it.");
-    guide_callout("run_note", "RUN DOES NOT BUILD AUTOMATICALLY", "If a build emits a differently named or located executable, the current Run button will not find it. Match the project folder name under bin, or launch that target outside Jaide.");
+    guide_callout("run_note", "Run Does Not Build Automatically", "If a build emits a differently named or located executable, the current Run button will not find it. Match the project folder name under bin, or launch that target outside Jaide.");
     UI.ui_spacing(30);
 }
 
@@ -693,15 +653,15 @@ draw_guide_troubleshooting :: () {
         "Start with these checks for the most common setup, build, and navigation problems."
     );
 
-    guide_card("trouble_language", "LANGUAGE NAVIGATION OR OUTLINE IS UNAVAILABLE", "Confirm Tools > Jai Setup points to the Jai installation root and that the programming executable is beside Jaide. For a custom layout, verify the Analysis entry.");
-    guide_card("trouble_confirm", "BUILD ASKS FOR CONFIRMATION EVERY TIME", "Open Project > Configure Build, make sure Command is not empty, and press Save. If the project moved, reopen it from the new path.");
-    guide_card("trouble_run", "BUILD SUCCEEDS, BUT RUN CANNOT FIND THE EXECUTABLE", "Run expects bin/<project-folder-name>. Adjust the build output to match. The Create Project template already follows this convention.");
-    guide_card("trouble_old", "AN OLDER JAI PROJECT SHOWS ERRORS", "Jaide targets current compiler syntax. Older code may use removed directives or now-ambiguous overloads. The editor remains usable while the compiler reports the incompatibility.");
-    guide_card("trouble_click", "A DOUBLE-CLICK DOES NOT NAVIGATE", "Definition lookup needs a resolvable identifier in a Jai file and a ready programming server. Compiler constructs open help only when Jaide has an explanation for them.");
+    guide_topic("Language Navigation or Outline Is Unavailable", "Confirm Tools > Jai Setup points to the Jai installation root and that the programming executable is beside Jaide. For a custom layout, verify the Analysis entry.");
+    guide_topic("Build Asks for Confirmation Every Time", "Open Project > Configure Build, make sure Command is not empty, and press Save. If the project moved, reopen it from the new path.");
+    guide_topic("Build Succeeds, but Run Cannot Find the Executable", "Run expects bin/<project-folder-name>. Adjust the build output to match. The Create Project template already follows this convention.");
+    guide_topic("An Older Jai Project Shows Errors", "Jaide targets current compiler syntax. Older code may use removed directives or now-ambiguous overloads. The editor remains usable while the compiler reports the incompatibility.");
+    guide_topic("A Double-Click Does Not Navigate", "Definition lookup needs a resolvable identifier in a Jai file and a ready programming server. Compiler constructs open help only when Jaide has an explanation for them.");
 
     guide_callout(
         "trouble_support",
-        "REPORT ISSUES AND GET HELP",
+        "Report Issues and Get Help",
         "Use the Jaide Discord group at discord.gg/AQp5V2fH4M. Include your operating system, Jai compiler version, a minimal project or code sample, and exact reproduction steps."
     );
     UI.ui_label_disabled_wrapped("Jaide is developed alongside the evolving Jai language. Additional editor features and deeper language integration are planned as both mature.");

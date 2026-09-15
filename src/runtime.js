@@ -270,8 +270,8 @@ function resize(instance) {
 
 async function start() {
     const [wasmResponse, packageResponse] = await Promise.all([
-        fetch("main.wasm?v=20260915j"),
-        fetch("assets.package?v=20260915j"),
+        fetch("main.wasm?v=20260915k"),
+        fetch("assets.package?v=20260915k"),
     ]);
     if (!wasmResponse.ok) throw new Error(`Could not load main.wasm (${wasmResponse.status}).`);
     if (!packageResponse.ok) throw new Error(`Could not load assets.package (${packageResponse.status}).`);
@@ -283,7 +283,7 @@ async function start() {
     // Jai's exported program entry point has C's (argc, argv) shape. Because
     // argv is a wasm64 pointer, JavaScript passes it as a BigInt.
     instance.exports.main(0, 0n);
-    const atlasTextureHandle = await loadTexture("atlas.png?v=20260915j");
+    const atlasTextureHandle = await loadTexture("atlas.png?v=20260915k");
     instance.exports.set_msdf_atlas_texture_input(atlasTextureHandle);
 
     const normalizedPath = () => window.location.pathname.replace(/\/+$/, "") || "/";
