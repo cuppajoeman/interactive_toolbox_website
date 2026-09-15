@@ -216,7 +216,7 @@ draw_navigation_tabs :: (program: *Interactive_Toolbox_Program) {
 
         UI.ui_cmd_rect(rect, background);
         text_x := UI.ui_text_centered_x(rect, item, style.font_size);
-        text_y := UI.ui_text_baseline_y(rect, style.font_size) - 3.0;
+        text_y := site_button_text_baseline_y(rect, style.font_size);
         UI.ui_cmd_text(item, text_x, text_y, style.font_size, style.color_text);
     }
 
@@ -257,7 +257,6 @@ draw_jaide_page :: (program: *Interactive_Toolbox_Program) {
 
 JAIDE_SECTION_NAMES :: string.[
     "OVERVIEW",
-    "REQUIREMENTS",
     "QUICK START",
     "INTERFACE",
     "LANGUAGE TOOLS",
@@ -265,7 +264,6 @@ JAIDE_SECTION_NAMES :: string.[
     "FILES & PANES",
     "BUILD & RUN",
     "KEYBINDINGS",
-    "MENUS",
     "CONFIGURATION",
     "TROUBLESHOOTING"
 ];
@@ -334,9 +332,13 @@ draw_guide_navigation_button :: (label: string, selected: bool, width: float32 =
 
     UI.ui_cmd_rect(rect, background);
     if selected UI.ui_cmd_rect_outline(rect, JAIDE_BLUE);
-    text_y := UI.ui_text_baseline_y(rect, style.font_size) - 3.0;
+    text_y := site_button_text_baseline_y(rect, style.font_size);
     UI.ui_cmd_text(label, rect.x + style.padding, text_y, style.font_size, ifx selected then JAIDE_BLUE else style.color_text);
     return clicked;
+}
+
+site_button_text_baseline_y :: (rect: UI.UI_Rect, font_size: float32) -> float32 {
+    return UI.ui_text_baseline_y(rect, font_size) - 1.5;
 }
 
 begin_guide_content :: (maximum_width: float32) {
@@ -360,17 +362,15 @@ end_guide_content :: () {
 draw_guide_content :: (program: *Interactive_Toolbox_Program) {
     if program.jaide_section == {
         case 0; draw_guide_overview();
-        case 1; draw_guide_requirements();
-        case 2; draw_guide_quick_start();
-        case 3; draw_guide_interface();
-        case 4; draw_guide_language_tools();
-        case 5; draw_guide_find_and_navigate();
-        case 6; draw_guide_files_and_panes();
-        case 7; draw_guide_build_and_run();
-        case 8; draw_guide_keybindings();
-        case 9; draw_guide_menus();
-        case 10; draw_guide_configuration();
-        case 11; draw_guide_troubleshooting();
+        case 1; draw_guide_quick_start();
+        case 2; draw_guide_interface();
+        case 3; draw_guide_language_tools();
+        case 4; draw_guide_find_and_navigate();
+        case 5; draw_guide_files_and_panes();
+        case 6; draw_guide_build_and_run();
+        case 7; draw_guide_keybindings();
+        case 8; draw_guide_configuration();
+        case 9; draw_guide_troubleshooting();
         case; draw_guide_pending_section(program.jaide_section);
     }
 }
@@ -450,17 +450,10 @@ guide_bullet :: (text: string) {
 
 draw_guide_overview :: () {
     guide_heading(
-        "COMPLETE REFERENCE",
-        "Everything you need to work in Jaide.",
-        "Jaide is a focused code editor for the Jai programming language. It combines a fast, project-oriented editor with Jai-aware parsing, symbol search, navigation, refactoring, and a configurable build workflow."
+        "OVERVIEW",
+        "A code editor for Jai",
+        "Jaide is a code editor for the Jai programming language with project-oriented editing, Jai-aware parsing, symbol search, navigation, refactoring, and a configurable build workflow."
     );
-
-    UI.ui_separator_text("AT A GLANCE");
-    guide_bullet("JAI-SPECIFIC LANGUAGE SUPPORT");
-    guide_bullet("PROJECT INDEXING AND SYMBOL SEARCH");
-    guide_bullet("SPLIT PANES, DEFINITION LOOKUP, AND USAGES");
-    guide_bullet("CONFIGURABLE BUILD AND RUN WORKFLOW");
-    UI.ui_spacing(14);
 
     guide_card(
         "guide_compiler_callout",
@@ -468,20 +461,6 @@ draw_guide_overview :: () {
         "Jai is not publicly distributed with Jaide. You need access to the Jai private beta and a local Jai installation. Jaide derives the compiler executable and standard modules from that installation.",
         0
     );
-    UI.ui_spacing(30);
-}
-
-draw_guide_requirements :: () {
-    guide_heading(
-        "START HERE",
-        "Requirements and compatibility",
-        "Jaide's parser and language-aware features track the current Jai language. Use a recent compiler build for the best results."
-    );
-
-    guide_card("guide_req_install", "JAI INSTALL DIRECTORY", "Select the root of your Jai installation, not its bin directory. Jaide looks for the platform compiler plus a valid modules/Basic.");
-    guide_card("guide_req_tools", "TWO EXECUTABLES", "A packaged installation contains the editor and its programming server. Keep them together; indexing and language navigation depend on the server.");
-    guide_card("guide_req_language", "CURRENT LANGUAGE BEHAVIOR", "Parsing and name resolution are designed around current Jai syntax. Older projects may contain removed directives or overloads that now produce diagnostics.");
-    guide_card("guide_req_text", "TEXT FILES", "Jaide opens editable text files and gives .jai files its language features. Binary-looking files are rejected instead of being displayed as corrupted text.");
     UI.ui_spacing(30);
 }
 
@@ -517,18 +496,19 @@ draw_guide_interface :: () {
     );
 
     guide_two_cards(
-        "interface_tree", "01 / PROJECT TREE", "Browse directories, open files, rename or delete files, and drag files between folders. Drag the divider to resize the panel.",
-        "interface_tabs", "02 / WORKSPACE TABS", "Each numbered tab remembers its pane arrangement and active view. Use + for a new workspace and x to close one."
+        "interface_tree", "Project Tree", "Browse directories, open files, rename or delete files, and drag files between folders. Drag the divider to resize the panel.",
+        "interface_tabs", "Workspace Tabs", "Each numbered tab remembers its pane arrangement and active view. Use + for a new workspace and x to close one."
     );
     guide_two_cards(
-        "interface_edit", "03 / EDITOR PANES", "Edit, select, scroll, zoom, and navigate. Every pane keeps its own cursor, selection, scroll position, and font size.",
-        "interface_outline", "04 / FILE OUTLINE", "See the current Jai file's types, file-level variables, and procedures. Collapse groups or click an entry to jump."
+        "interface_edit", "Editor Panes", "A pane is a window configuration that can view any file; it is not tied to one specific file. Every pane keeps its own cursor, selection, scroll position, and font size.",
+        "interface_outline", "File Outline", "See the current Jai file's types, file-level variables, and procedures. Collapse groups or click an entry to jump."
     );
     guide_two_cards(
-        "interface_results", "05 / RESULT WINDOWS", "Go to, usages, rename, build output, run output, compiler explanations, and setup appear in movable focused windows.",
-        "interface_status", "06 / STATUS BAR", "Shows the active path, dirty marker, line and column, editor messages, local time, and frame rate."
+        "interface_results", "Result Windows", "Go to, usages, rename, build output, run output, compiler explanations, and setup appear in movable focused windows.",
+        "interface_status", "Status Bar", "Shows the active path, dirty marker, line and column, editor messages, local time, and frame rate."
     );
 
+    guide_topic("Project tree actions", "Click a file to open it or a directory to expand it. Right-click files to rename or delete them, and drag files into folders or back to the project root. Moves and renames never overwrite an existing destination, and directory symlinks are not traversed or accepted as move targets.");
     guide_topic("Show or hide supporting panels", "Use View > Toggle Project Tree and View > Toggle Outline. Both side panels have draggable dividers. View > Enable Line Wrap wraps long lines; disabling it restores horizontal scrolling.");
     UI.ui_spacing(30);
 }
@@ -539,12 +519,6 @@ draw_guide_language_tools :: () {
         "Jai language tools",
         "A companion programming server provides parsing, indexing, name resolution, document symbols, semantic tokens, references, and rename operations."
     );
-
-    guide_two_cards(
-        "language_point", "01 / POINT AT CODE", "Use an identifier, directive, note, import, or loaded-file path.",
-        "language_action", "02 / CHOOSE AN ACTION", "Double-click for a definition, Shift-click for usages, or Ctrl-click to rename."
-    );
-    guide_card("language_result", "03 / NAVIGATE OR INSPECT", "Open source, view resolved occurrences, rename symbols, or read explanations for compiler-provided constructs.");
 
     guide_topic("Go to definition", "Double-click an identifier to open its declaration in the active pane. The destination is centered and the origin enters jump history. Double-right-click to return.");
     guide_topic("Show usages and rename", "Shift-click opens all resolved occurrences with source previews. Ctrl-click opens the same project-aware list in rename mode. Enter a valid Jai identifier and apply Rename to update the declaration and references.");
@@ -584,17 +558,10 @@ draw_guide_files_and_panes :: () {
     guide_heading(
         "WORKSPACE",
         "Files, tabs, and panes",
-        "Documents and views are separate: one file can appear in several panes while each pane keeps its own viewing state."
+        "Each pane is an independent window configuration that can view any file; it is not tied to a specific file. One file can appear in several panes while each pane keeps its own viewing state."
     );
 
-    UI.ui_separator_text("PROJECT TREE ACTIONS");
-    guide_bullet("CLICK A FILE TO OPEN IT; CLICK A DIRECTORY TO EXPAND OR COLLAPSE.");
-    guide_bullet("RIGHT-CLICK A FILE TO RENAME IT OR OPEN DELETE CONFIRMATION.");
-    guide_bullet("DRAG A FILE TO A FOLDER OR BACK TO THE PROJECT ROOT.");
-    guide_bullet("MOVE AND RENAME NEVER OVERWRITE AN EXISTING DESTINATION.");
-    guide_bullet("DIRECTORY SYMLINKS ARE NOT TRAVERSED OR ACCEPTED AS MOVE TARGETS.");
-
-    guide_topic("Workspace tabs and shared documents", "The numbered tabs are workspace tabs, not one-file-only tabs. A tab owns an editor layout with one or more panes. When the same file is visible twice, edits are shared but cursor, selection, scroll, and zoom stay pane-local.");
+    guide_topic("Workspace tabs and shared documents", "The numbered tabs are workspace tabs, not one-file-only tabs. A tab owns an editor layout with one or more panes, and each pane can switch between files without changing its layout role. When the same file is visible twice, edits are shared but cursor, selection, scroll, and zoom stay pane-local.");
     guide_topic("Create and resize split panes", "Move near a pane edge until a subtle handle appears. Drag inward and release on the highlighted preview. Drag the divider to resize. Use a pane's x to close one view; the final pane cannot be closed this way.");
     guide_topic("Swap panes", "Hold Ctrl + Alt, drag from one pane, and release over another pane in the same tab. Release over the source, outside the panes, or press Esc to cancel.");
     guide_topic("Persistent undo", "Jaide stores an undo sidecar for each opened file. Cursor, selection, undo, and redo are restored only when the on-disk contents still match.");
@@ -608,12 +575,7 @@ draw_guide_build_and_run :: () {
         "Build commands are project-specific and must be confirmed once. Jaide keeps the saved command separate from the project repository."
     );
 
-    UI.ui_separator_text("AUTOMATIC BUILD DETECTION");
-    guide_bullet("A CONVENTIONAL TOP-LEVEL build.jai.");
-    guide_bullet("OTHER TOP-LEVEL JAI BUILD METAPROGRAMS.");
-    guide_bullet("COMMON BUILD SCRIPTS FOR THE CURRENT PLATFORM.");
-    guide_bullet("A SINGLE first.jai, main.jai, OR SOLE JAI SOURCE FILE.");
-    UI.ui_label_disabled_wrapped("If several candidates are found, choose one from Detected. Jaide never runs a detected command until you confirm it.");
+    guide_topic("Automatic build detection", "Jaide first looks for a conventional top-level build.jai, then other top-level Jai build metaprograms, common build scripts for the current platform, and finally a single first.jai, main.jai, or sole Jai source file. If several candidates are found, choose one from Detected. Jaide never runs a detected command until you confirm it.");
 
     UI.ui_spacing(16);
     UI.ui_separator_text("THE THREE BUILD FIELDS");
@@ -678,7 +640,7 @@ draw_guide_keybindings :: () {
     UI.ui_end_table();
 
     UI.ui_spacing(16);
-    UI.ui_separator_text("FIND, NAVIGATE, AND POINTER");
+    UI.ui_separator_text("FIND AND NAVIGATE");
     UI.ui_begin_table("navigation_key_table", 2);
     UI.ui_table_header_row(string.["INPUT", "ACTION"]);
     guide_key_row("Enter / Shift + Enter", "Next / previous file match");
@@ -694,28 +656,6 @@ draw_guide_keybindings :: () {
     guide_key_row("Ctrl + wheel", "Zoom pane text");
     guide_key_row("Ctrl + Alt + drag", "Swap panes");
     UI.ui_end_table();
-    UI.ui_spacing(30);
-}
-
-draw_guide_menus :: () {
-    guide_heading(
-        "COMMAND MAP",
-        "Menu reference",
-        "Every command currently exposed in the top menu bar. Build and Run stay visible at the far right."
-    );
-
-    guide_two_cards(
-        "menu_file", "FILE", "Open File, Open Project, Open Recent, Create Project, Save.",
-        "menu_edit", "EDIT", "Undo, Redo."
-    );
-    guide_two_cards(
-        "menu_view", "VIEW", "Toggle Project Tree, Toggle Outline, Enable or Disable Line Wrap.",
-        "menu_project", "PROJECT", "Configure Build, Re-detect Build Command, Open Project Config."
-    );
-    guide_two_cards(
-        "menu_navigate", "NAVIGATE", "Open Go to for fuzzy file and symbol search.",
-        "menu_tools", "TOOLS", "Jai Setup, Open Application Config."
-    );
     UI.ui_spacing(30);
 }
 
