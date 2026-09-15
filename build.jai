@@ -1,58 +1,92 @@
-OUTPUT_EXECUTABLE_NAME :: "change_me";
-
-Build_Mode :: enum {
-    UNOPTIMIZED;
-    OPTIMIZED;
-}
+// Build the Interactive Toolbox site as a WebAssembly module.
 
 #run {
     set_build_options_dc(.{do_output = false});
 
-    args := get_build_options().compile_time_command_line;
-    build_mode := get_requested_build_optimization_mode(args);
+    make_directory_if_it_does_not_exist(".build", recursive = true);
+    make_directory_if_it_does_not_exist("dist/jaide", recursive = true);
+    copy_site_files();
+    build_web_asset_package();
 
-    make_directory_if_it_does_not_exist("bin", recursive = true);
-
-    w := compiler_create_workspace("Target Program");
-    options := get_build_options(w);
+    workspace := compiler_create_workspace("Interactive Toolbox Website (WASM)");
+    options := get_build_options(workspace);
     copy_commonly_propagated_fields(get_build_options(), *options);
-    options.output_executable_name = OUTPUT_EXECUTABLE_NAME;
-    apply_build_optimization_options(*options, build_mode);
-    options.output_path = "bin/";
 
-    import_path: [..] string;
-    array_add(*import_path, ..options.import_path);
-    array_add(*import_path, "src/");
-    options.import_path = import_path;
-    
-    set_build_options(options, w);
+    options.output_type                         = .EXECUTABLE;
+    options.backend                             = .LLVM;
+    options.os_target                           = .WASM;
+    options.cpu_target                          = .CUSTOM;
+    options.emit_debug_info                     = .DWARF;
+    options.backtrace_on_crash                  = .OFF;
+    options.output_path                         = "dist/";
+    options.output_executable_name              = "main";
+    options.llvm_options.target_system_features = "+bulk-memory";
+    options.llvm_options.enable_split_modules   = false;
+    options.llvm_options.function_sections      = true;
 
-    add_build_file("src/main.jai", w);
-};
+    import_paths: [..] string;
+    array_add(*import_paths, tprint("%src", #filepath));
+    for options.import_path array_add(*import_paths, it);
+    options.import_path = import_paths;
 
-get_requested_build_optimization_mode :: (args: [] string) -> Build_Mode {
-    if command_line_has_flag("-unoptimized") || command_line_has_flag("-debug") return .UNOPTIMIZED;
-    if command_line_has_flag("-optimized") || command_line_has_flag("-o") return .OPTIMIZED;
+    STACK_SIZE :: 64 * 1024;
+    options.additional_linker_arguments = .[
+        "--stack-first",
+        "-z",
+        tprint("stack-size=%", STACK_SIZE),
+    ];
 
-    return .UNOPTIMIZED;
+    set_build_options(options, workspace);
+
+    remap_import(workspace, "*", "Default_Allocator", "tbx/web/Wasm_Arena");
+    remap_import(workspace, "*", "GL", "tbx/web/WebGL_GL");
+    remap_import(workspace, "*", "Simple_Package", "tbx/web/Web_Simple_Package");
+    remap_import(workspace, "*", "tbx/distance_field_generation", "tbx/web/Web_MSDF_Types");
+
+    add_build_file("src/main.jai", workspace);
 }
 
-command_line_has_flag :: (flag: string) -> bool {
-    return array_find(get_toplevel_command_line(), flag);
+copy_site_files :: () {
+    copy_site_file("src/runtime.js", "dist/runtime.js");
+    copy_site_file("site/index.html", "dist/index.html");
+    copy_site_file("site/index.html", "dist/jaide/index.html");
+    copy_site_file("site/favicon.svg", "dist/favicon.svg");
+    copy_site_file("assets/fonts/pt_mono/atlas.png", "dist/atlas.png");
 }
 
-apply_build_optimization_options :: (options: *Build_Options, mode: Build_Mode) {
-    if mode != .OPTIMIZED return;
+copy_site_file :: (source_path: string, destination_path: string) {
+    contents, ok := read_entire_file(source_path);
+    if !ok {
+        compiler_report(tprint("Could not read site asset: %", source_path), mode = .ERROR);
+        return;
+    }
+    defer free(contents.data);
 
-    set_optimization(options, .VERY_OPTIMIZED, preserve_debug_info = false);
-    options.stack_trace = false;
-    options.enable_frame_pointers = false;
-    options.backtrace_on_crash = .OFF;
-    options.array_bounds_check = .OFF;
-    options.cast_bounds_check = .OFF;
-    options.null_pointer_check = .OFF;
+    if !write_entire_file(destination_path, contents) {
+        compiler_report(tprint("Could not write site asset: %", destination_path), mode = .ERROR);
+    }
+}
+
+build_web_asset_package :: () {
+    font_metrics_path :: "assets/fonts/pt_mono/atlas.json";
+    font_metrics, font_metrics_ok := read_entire_file(font_metrics_path);
+    if !font_metrics_ok {
+        compiler_report(tprint("Could not read web font metrics: %", font_metrics_path), mode = .ERROR);
+        return;
+    }
+    defer free(font_metrics.data);
+
+    package: Simple_Package.Create_Package;
+    Simple_Package.init(*package);
+    defer Simple_Package.deinit(*package);
+
+    Simple_Package.add(*package, "fonts/pt_mono/atlas.json", xx font_metrics);
+    if !Simple_Package.write(*package, "dist/assets.package") {
+        compiler_report("Could not write dist/assets.package", mode = .ERROR);
+    }
 }
 
 #import "Basic";
 #import "Compiler";
 #import "File";
+Simple_Package :: #import "Simple_Package";
