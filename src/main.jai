@@ -413,6 +413,8 @@ guide_bullet :: (text: string) {
 
 draw_guide_overview :: () {
     UI.ui_spacing(12);
+    UI.ui_label_disabled_wrapped("Jaide is a code editor for the Jai programming language with project-oriented editing, Jai-aware parsing, symbol search, navigation, refactoring, and a configurable build workflow. You can purchase Jaide on Steam.");
+    UI.ui_spacing(12);
     guide_card(
         "guide_compiler_callout",
         "THE JAI COMPILER IS REQUIRED",
